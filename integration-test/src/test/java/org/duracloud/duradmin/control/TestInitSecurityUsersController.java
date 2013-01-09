@@ -15,7 +15,7 @@ import org.duracloud.common.model.Credential;
 import org.duracloud.common.web.RestHttpHelper;
 import org.duracloud.duradmin.DuradminTestBase;
 import org.duracloud.duradmin.RestTestHelper;
-import org.duracloud.security.domain.SecurityUserBean;
+import org.duracloud.common.model.SecurityUserBean;
 import org.duracloud.security.xml.SecurityUsersDocumentBinding;
 import org.junit.Assert;
 import org.junit.Before;

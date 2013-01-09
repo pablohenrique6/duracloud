@@ -7,6 +7,7 @@
  */
 package org.duracloud.security.domain;
 
+import org.duracloud.common.model.SecurityUserBean;
 import org.junit.Test;
 
 import java.util.ArrayList;

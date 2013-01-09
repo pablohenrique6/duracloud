@@ -27,7 +27,7 @@ import org.duracloud.duradmin.domain.Space;
 import org.duracloud.duradmin.util.SpaceUtil;
 import org.duracloud.error.ContentStoreException;
 import org.duracloud.security.DuracloudUserDetailsService;
-import org.duracloud.security.domain.SecurityUserBean;
+import org.duracloud.common.model.SecurityUserBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

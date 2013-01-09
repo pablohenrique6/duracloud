@@ -8,11 +8,10 @@
 package org.duracloud.appconfig.domain;
 
 import org.duracloud.common.error.DuraCloudRuntimeException;
-import org.duracloud.common.model.Credential;
 import org.duracloud.common.model.RootUserCredential;
 import org.duracloud.common.util.ExceptionUtil;
 import org.duracloud.common.web.RestHttpHelper;
-import org.duracloud.security.domain.SecurityUserBean;
+import org.duracloud.common.model.SecurityUserBean;
 import org.duracloud.security.xml.SecurityUsersDocumentBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

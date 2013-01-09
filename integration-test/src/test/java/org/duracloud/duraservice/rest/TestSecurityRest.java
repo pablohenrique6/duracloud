@@ -10,7 +10,7 @@ package org.duracloud.duraservice.rest;
 import org.apache.commons.httpclient.HttpStatus;
 import org.duracloud.common.model.Credential;
 import org.duracloud.common.web.RestHttpHelper;
-import org.duracloud.security.domain.SecurityUserBean;
+import org.duracloud.common.model.SecurityUserBean;
 import org.duracloud.security.xml.SecurityUsersDocumentBinding;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;

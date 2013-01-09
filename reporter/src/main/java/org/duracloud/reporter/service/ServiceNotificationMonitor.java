@@ -10,7 +10,7 @@ package org.duracloud.reporter.service;
 import org.duracloud.common.notification.NotificationManager;
 import org.duracloud.common.notification.NotificationType;
 import org.duracloud.security.DuracloudUserDetailsService;
-import org.duracloud.security.domain.SecurityUserBean;
+import org.duracloud.common.model.SecurityUserBean;
 import org.duracloud.serviceconfig.ServiceSummary;
 import org.duracloud.servicemonitor.ServiceMonitorEventHandler;
 import org.duracloud.services.ComputeService;

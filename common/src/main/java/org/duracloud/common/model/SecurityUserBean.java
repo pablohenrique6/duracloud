@@ -5,7 +5,7 @@
  *
  *     http://duracloud.org/license/
  */
-package org.duracloud.security.domain;
+package org.duracloud.common.model;
 
 import org.apache.commons.lang.StringUtils;
 

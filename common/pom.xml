@@ -75,6 +75,12 @@
       <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>com.springsource.org.apache.commons.lang</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
     <dependency>  
       <groupId>com.thoughtworks.xstream</groupId>  
       <artifactId>com.springsource.com.thoughtworks.xstream</artifactId>

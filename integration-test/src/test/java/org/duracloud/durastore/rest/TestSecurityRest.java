@@ -10,7 +10,7 @@ package org.duracloud.durastore.rest;
 import org.duracloud.common.model.Credential;
 import org.duracloud.common.web.RestHttpHelper;
 import org.duracloud.common.web.RestHttpHelper.HttpResponse;
-import org.duracloud.security.domain.SecurityUserBean;
+import org.duracloud.common.model.SecurityUserBean;
 import org.duracloud.security.xml.SecurityUsersDocumentBinding;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;

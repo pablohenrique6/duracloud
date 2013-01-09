@@ -8,7 +8,7 @@
 package org.duracloud.security;
 
 import org.springframework.security.userdetails.UserDetailsService;
-import org.duracloud.security.domain.SecurityUserBean;
+import org.duracloud.common.model.SecurityUserBean;
 
 import java.util.List;
 

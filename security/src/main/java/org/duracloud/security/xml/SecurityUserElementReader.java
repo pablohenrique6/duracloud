@@ -11,7 +11,7 @@ import org.duracloud.SecurityUserType;
 import org.duracloud.SecurityUsersDocument;
 import org.duracloud.SecurityUsersType;
 import org.duracloud.common.error.DuraCloudRuntimeException;
-import org.duracloud.security.domain.SecurityUserBean;
+import org.duracloud.common.model.SecurityUserBean;
 
 import java.util.ArrayList;
 import java.util.List;

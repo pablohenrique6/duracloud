@@ -12,7 +12,7 @@ import org.apache.xmlbeans.XmlObject;
 import org.duracloud.SecurityUsersDocument;
 import org.duracloud.SecurityUsersType;
 import org.duracloud.common.error.DuraCloudRuntimeException;
-import org.duracloud.security.domain.SecurityUserBean;
+import org.duracloud.common.model.SecurityUserBean;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

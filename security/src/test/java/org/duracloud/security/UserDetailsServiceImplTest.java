@@ -18,7 +18,7 @@ import org.junit.Test;
 import org.springframework.security.userdetails.UsernameNotFoundException;
 import org.springframework.security.GrantedAuthority;
 import org.duracloud.security.impl.UserDetailsServiceImpl;
-import org.duracloud.security.domain.SecurityUserBean;
+import org.duracloud.common.model.SecurityUserBean;
 
 import java.util.ArrayList;
 import java.util.List;

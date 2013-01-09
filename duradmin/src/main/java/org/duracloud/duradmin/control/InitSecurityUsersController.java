@@ -14,17 +14,14 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 import static org.duracloud.common.util.ExceptionUtil.getStackTraceAsString;
 import static org.duracloud.security.xml.SecurityUsersDocumentBinding.createSecurityUsersFrom;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.ServletInputStream;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.duracloud.common.error.DuraCloudRuntimeException;
 import org.duracloud.security.DuracloudUserDetailsService;
-import org.duracloud.security.domain.SecurityUserBean;
+import org.duracloud.common.model.SecurityUserBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.ModelAndView;

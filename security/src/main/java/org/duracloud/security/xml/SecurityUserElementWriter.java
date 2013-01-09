@@ -9,7 +9,7 @@ package org.duracloud.security.xml;
 
 import org.duracloud.SecurityUserType;
 import org.duracloud.SecurityUsersType;
-import org.duracloud.security.domain.SecurityUserBean;
+import org.duracloud.common.model.SecurityUserBean;
 
 import java.util.Collection;
 

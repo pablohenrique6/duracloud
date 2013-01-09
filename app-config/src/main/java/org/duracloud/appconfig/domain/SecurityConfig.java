@@ -9,7 +9,7 @@ package org.duracloud.appconfig.domain;
 
 import org.apache.commons.lang.StringUtils;
 import org.duracloud.common.error.DuraCloudRuntimeException;
-import org.duracloud.security.domain.SecurityUserBean;
+import org.duracloud.common.model.SecurityUserBean;
 import org.duracloud.security.xml.SecurityUsersDocumentBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

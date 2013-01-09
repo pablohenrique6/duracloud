@@ -7,7 +7,7 @@
  */
 package org.duracloud.appconfig.domain;
 
-import org.duracloud.security.domain.SecurityUserBean;
+import org.duracloud.common.model.SecurityUserBean;
 import org.junit.Assert;
 import org.junit.Test;
 

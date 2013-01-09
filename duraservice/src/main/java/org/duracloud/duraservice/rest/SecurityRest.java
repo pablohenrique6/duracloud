@@ -12,7 +12,7 @@ import org.duracloud.security.DuracloudUserDetailsService;
 
 import static org.duracloud.security.xml.SecurityUsersDocumentBinding.createSecurityUsersFrom;
 
-import org.duracloud.security.domain.SecurityUserBean;
+import org.duracloud.common.model.SecurityUserBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

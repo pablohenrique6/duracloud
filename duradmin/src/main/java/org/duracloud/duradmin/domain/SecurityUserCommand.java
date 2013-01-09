@@ -10,7 +10,7 @@ package org.duracloud.duradmin.domain;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.duracloud.security.domain.SecurityUserBean;
+import org.duracloud.common.model.SecurityUserBean;
 
 /**
  * @author Andrew Woods

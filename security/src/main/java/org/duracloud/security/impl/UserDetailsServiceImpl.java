@@ -12,7 +12,7 @@ import org.duracloud.common.model.Credential;
 import org.duracloud.common.model.RootUserCredential;
 import org.duracloud.common.model.SystemUserCredential;
 import org.duracloud.security.DuracloudUserDetailsService;
-import org.duracloud.security.domain.SecurityUserBean;
+import org.duracloud.common.model.SecurityUserBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -33,6 +33,7 @@ import java.util.Map;
  * @author Andrew Woods
  *         Date: Mar 11, 2010
  */
+@Deprecated
 public class UserDetailsServiceImpl implements DuracloudUserDetailsService {
     private final Logger log = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
 
