@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="duracloud.org"
+  targetNamespace="duracloud.org"> 
+
+  <xs:element name="security-config" type="SecurityConfigType"/>
+  
+  <xs:complexType name="SecurityConfigType">
+    <xs:sequence>
+      <xs:element name="ldap" type="LdapType"/>
+      <xs:element name="acctIds" type="AcctIdsType"/>
+    </xs:sequence>
+    <xs:attribute name="schemaVersion" type="xs:string" fixed="2.3" use="required"/>
+  </xs:complexType>
+  
+  <xs:complexType name="LdapType">
+    <xs:sequence>      
+      <xs:element name="basedn" type="xs:string"/>
+      <xs:element name="userdn" type="xs:string"/>
+      <xs:element name="password" type="xs:string"/>
+      <xs:element name="url" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:simpleType name="AcctIdsType">
+    <xs:list itemType="xs:int"/>
+  </xs:simpleType>
+
+</xs:schema>

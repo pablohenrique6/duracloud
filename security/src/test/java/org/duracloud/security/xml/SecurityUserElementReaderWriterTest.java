@@ -7,7 +7,8 @@
  */
 package org.duracloud.security.xml;
 
-import org.duracloud.common.model.SecurityUserBean;
+import org.duracloud.ldap.domain.LdapConfig;
+import org.duracloud.security.domain.SecurityConfigBean;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -15,8 +16,8 @@ import org.junit.Test;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Andrew Woods
@@ -24,15 +25,15 @@ import java.util.List;
  */
 public class SecurityUserElementReaderWriterTest {
 
-    private static final int NUM_ENTRIES = 5;
+    private static final int NUM_ACCTS = 3;
 
     private InputStream stream;
 
-    private final String usernamePrefix = "username-";
-    private final String passwordPrefix = "password-";
-    private final String emailPrefix = "email-";
-    private final String grantPrefix = "ROLE-";
-    private final String groupPrefix = "group.";
+    private final String basedn = "basedn-";
+    private final String userdn = "userdn-";
+    private final String password = "password-";
+    private final String url = "url-";
+    private Set<Integer> acctIds;
 
     @After
     public void tearDown() throws IOException {
@@ -44,115 +45,65 @@ public class SecurityUserElementReaderWriterTest {
 
     @Test
     public void testReadWrite() {
-        boolean fullBeans = true;
-        List<SecurityUserBean> users = createUsers(fullBeans);
-        doTest(users, fullBeans);
+        SecurityConfigBean config = createSecurityConfig();
+        doTest(config);
     }
 
-    private void doTest(List<SecurityUserBean> users, boolean fullBeans) {
-        String xml = SecurityUsersDocumentBinding.createDocumentFrom(users);
+    private SecurityConfigBean createSecurityConfig() {
+        SecurityConfigBean config = new SecurityConfigBean();
+
+        LdapConfig ldapConfig = new LdapConfig();
+        ldapConfig.setLdapBaseDn(basedn);
+        ldapConfig.setLdapUserDn(userdn);
+        ldapConfig.setLdapPassword(password);
+        ldapConfig.setLdapUrl(url);
+
+        acctIds = new HashSet<>();
+        for (int i = 10; i < NUM_ACCTS; ++i) {
+            acctIds.add(i);
+        }
+
+        config.setLdapConfig(ldapConfig);
+        config.setAcctIds(acctIds);
+
+        return config;
+    }
+
+    private void doTest(SecurityConfigBean expected) {
+        String xml = SecurityDocumentBinding.createDocumentFrom(expected);
         Assert.assertNotNull(xml);
 
         stream = new ByteArrayInputStream(xml.getBytes());
-        List<SecurityUserBean> beans = SecurityUsersDocumentBinding.createSecurityUsersFrom(
-            stream);
-        Assert.assertNotNull(beans);
+        SecurityConfigBean config =
+            SecurityDocumentBinding.createSecurityConfigFrom(stream);
+        Assert.assertNotNull(config);
 
-        verifyUsers(beans, fullBeans);
+        verifyConfig(config);
     }
 
-    private List<SecurityUserBean> createUsers(boolean fullBeans) {
-        List<SecurityUserBean> users = new ArrayList<SecurityUserBean>();
+    private void verifyConfig(SecurityConfigBean config) {
+        Assert.assertNotNull(config);
 
-        SecurityUserBean user;
-        List<String> grantedAuthorties;
-        List<String> groups;
-        for (int i = 0; i < NUM_ENTRIES; ++i) {
-            boolean flag = (i % 2 == 0);
+        LdapConfig ldapConfig = config.getLdapConfig();
+        Set<Integer> acctIdsSet = config.getAcctIds();
 
-            grantedAuthorties = new ArrayList<String>();
-            for (int j = 0; j < i + 1; ++j) {
-                grantedAuthorties.add(grantPrefix + j);
-            }
+        Assert.assertNotNull(ldapConfig);
+        Assert.assertNotNull(acctIdsSet);
 
-            groups = new ArrayList<String>();
-            for (int j = 0; j < i + 1; ++j) {
-                groups.add(groupPrefix + j);
-            }
+        Assert.assertNotNull(ldapConfig.getLdapBaseDn());
+        Assert.assertNotNull(ldapConfig.getLdapUserDn());
+        Assert.assertNotNull(ldapConfig.getLdapPassword());
+        Assert.assertNotNull(ldapConfig.getLdapUrl());
 
-            if (fullBeans) {
-                user = new SecurityUserBean(usernamePrefix + i,
-                                            passwordPrefix + i,
-                                            emailPrefix + i,
-                                            flag,
-                                            flag,
-                                            flag,
-                                            flag,
-                                            grantedAuthorties,
-                                            groups);
-            } else {
-                user = new SecurityUserBean(usernamePrefix + i,
-                                            passwordPrefix + i,
-                                            grantedAuthorties);
-            }
-            users.add(user);
+        Assert.assertEquals(basedn, ldapConfig.getLdapBaseDn());
+        Assert.assertEquals(userdn, ldapConfig.getLdapUserDn());
+        Assert.assertEquals(password, ldapConfig.getLdapPassword());
+        Assert.assertEquals(url, ldapConfig.getLdapUrl());
+
+        Assert.assertEquals(acctIds.size(), acctIdsSet.size());
+        for (Integer acctId : acctIds) {
+            Assert.assertTrue(acctIdsSet.contains(acctId));
         }
-        return users;
-    }
-
-    private void verifyUsers(List<SecurityUserBean> b, boolean fullBeans) {
-        Assert.assertNotNull(b);
-        Assert.assertEquals(NUM_ENTRIES, b.size());
-
-        for (SecurityUserBean user : b) {
-            int index = getIndex(user);
-
-            String username = user.getUsername();
-            String password = user.getPassword();
-            String email = user.getEmail();
-            boolean enabled = user.isEnabled();
-            boolean credentialNonExpired = user.isCredentialsNonExpired();
-            boolean accountNonExpired = user.isAccountNonExpired();
-            boolean accountNonLocked = user.isAccountNonLocked();
-
-            Assert.assertNotNull(username);
-            Assert.assertNotNull(password);
-            Assert.assertNotNull(email);
-
-            Assert.assertEquals(usernamePrefix + index, username);
-            Assert.assertEquals(passwordPrefix + index, password);
-            Assert.assertEquals(emailPrefix + index, email);
-
-            if (fullBeans) {
-                Assert.assertEquals(index % 2 == 0, enabled);
-            } else {
-                Assert.assertEquals(true, enabled);
-            }
-            boolean same = (enabled == credentialNonExpired) &&
-                (enabled == accountNonExpired) && (enabled == accountNonLocked);
-            Assert.assertTrue(same);
-
-            List<String> grants = user.getGrantedAuthorities();
-            Assert.assertNotNull(grants);
-            Assert.assertEquals(index, grants.size() - 1);
-            for (int i = 0; i < index; ++i) {
-                Assert.assertTrue(grants.contains(grantPrefix + i));
-            }
-
-            List<String> groups = user.getGroups();
-            Assert.assertNotNull(groups);
-            Assert.assertEquals(index, groups.size() - 1);
-            for (int i = 0; i < index; ++i) {
-                Assert.assertTrue(groups.contains(groupPrefix + i));
-            }
-        }
-
-    }
-
-    private int getIndex(SecurityUserBean user) {
-        String username = user.getUsername();
-        Assert.assertNotNull(username);
-        return Integer.parseInt(username.substring(usernamePrefix.length()));
     }
 
 }

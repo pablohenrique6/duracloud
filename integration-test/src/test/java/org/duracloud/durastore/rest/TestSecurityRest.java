@@ -11,7 +11,7 @@ import org.duracloud.common.model.Credential;
 import org.duracloud.common.web.RestHttpHelper;
 import org.duracloud.common.web.RestHttpHelper.HttpResponse;
 import org.duracloud.common.model.SecurityUserBean;
-import org.duracloud.security.xml.SecurityUsersDocumentBinding;
+import org.duracloud.security.xml.SecurityDocumentBinding;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -99,25 +99,13 @@ public class TestSecurityRest extends BaseRestTester {
         headCaller.makeCall(status);
     }
 
+    /**
+     * Note:
+     * This method (setting user security credentials) is no longer supported.
+     */
     private void setUserSecurity(Credential cred, List<String> grants)
         throws Exception {
-        SecurityUserBean userBean = new SecurityUserBean(cred.getUsername(),
-                                                         cred.getPassword(),
-                                                         grants);
-        List<SecurityUserBean> users = new ArrayList<SecurityUserBean>();
-        users.add(userBean);
-
-        final String securityUrl = RestTestHelper.getBaseUrl() + "/security";
-        final String xml = SecurityUsersDocumentBinding.createDocumentFrom(users);
-        final Map<String, String> headers = null;
-
-        // add security user
-        HttpCaller caller = new HttpCaller() {
-            protected HttpResponse call() throws Exception {
-                return BaseRestTester.restHelper.post(securityUrl, xml, headers);
-            }
-        };
-        caller.makeCall(200);
+        // no-op
     }
 
     @Test

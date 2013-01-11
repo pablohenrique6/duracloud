@@ -19,6 +19,7 @@ import org.duracloud.appconfig.support.ApplicationWithConfig;
 import org.duracloud.common.error.DuraCloudRuntimeException;
 import org.duracloud.common.util.ChecksumUtil;
 import org.duracloud.common.web.RestHttpHelper;
+import org.duracloud.security.domain.SecurityConfigBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -335,14 +336,16 @@ public class ApplicationInitializer extends BaseConfig {
     }
 
     /**
-     * This method sets the security users from the loaded configuration.
+     * This method sets the security config from the loaded configuration.
      */
-    public void setSecurityUsers() {
+    public void setSecurityConfig() {
         RestHttpHelper.HttpResponse response = null;
 
         for (ApplicationWithConfig appWithConfig : appsWithConfigs.values()) {
             Application app = appWithConfig.getApplication();
-            response = app.setSecurityUsers(securityConfig.getUsers());
+            response = app.setSecurityConfig(new SecurityConfigBean(
+                securityConfig.getLdapConfig(),
+                securityConfig.getAcctIds()));
             validate(response, appWithConfig.getName());
         }
     }

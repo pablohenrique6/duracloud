@@ -9,38 +9,36 @@ package org.duracloud.security.xml;
 
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
-import org.duracloud.SecurityUsersDocument;
-import org.duracloud.SecurityUsersType;
+import org.duracloud.SecurityConfigDocument;
+import org.duracloud.SecurityConfigType;
 import org.duracloud.common.error.DuraCloudRuntimeException;
-import org.duracloud.common.model.SecurityUserBean;
+import org.duracloud.security.domain.SecurityConfigBean;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.List;
 
 
 /**
- * This class is a helper utility for binding SecurityUserBean objects to a
- * SecurityUsers xml document.
+ * This class is a helper utility for binding SecurityConfigBean objects to a
+ * SecurityConfig xml document.
  *
  * @author Andrew Woods
  *         Date: Apr 15, 2010
  */
-public class SecurityUsersDocumentBinding {
+public class SecurityDocumentBinding {
 
     /**
-     * This method binds a SecurityUserBean list to the content of the arg xml.
+     * This method binds a SecurityConfigBean to the content of the arg xml.
      *
-     * @param xml document to be bound to SecurityUserBean list
-     * @return SecurityUserBean list
+     * @param xml document to be bound to SecurityConfigBean
+     * @return SecurityConfigBean
      */
-    public static List<SecurityUserBean> createSecurityUsersFrom(InputStream xml) {
+    public static SecurityConfigBean createSecurityConfigFrom(InputStream xml) {
         try {
-            SecurityUsersDocument doc = SecurityUsersDocument.Factory
-                .parse(xml);
-            return SecurityUserElementReader.createSecurityUsersFrom(doc);
+            SecurityConfigDocument doc = SecurityConfigDocument.Factory.parse(
+                xml);
+            return SecurityConfigElementReader.createSecurityConfigFrom(doc);
         } catch (XmlException e) {
             throw new DuraCloudRuntimeException(e);
         } catch (IOException e) {
@@ -49,17 +47,19 @@ public class SecurityUsersDocumentBinding {
     }
 
     /**
-     * This method serializes the arg SecurityUserBean list into an xml document.
+     * This method serializes the arg SecurityConfigBean into an xml document.
      *
-     * @param users SecurityUserBean list to be serialized
-     * @return SecurityUsers xml document
+     * @param config SecurityConfigBean to be serialized
+     * @return SecurityConfig xml document
      */
-    public static String createDocumentFrom(Collection<SecurityUserBean> users) {
-        SecurityUsersDocument doc = SecurityUsersDocument.Factory.newInstance();
-        if (null != users) {
-            SecurityUsersType usersType = SecurityUserElementWriter.createSecurityUsersElementFrom(
-                users);
-            doc.setSecurityUsers(usersType);
+    public static String createDocumentFrom(SecurityConfigBean config) {
+        SecurityConfigDocument doc =
+            SecurityConfigDocument.Factory.newInstance();
+        if (null != config) {
+            SecurityConfigType configType =
+                SecurityConfigElementWriter.createSecurityConfigElementFrom(
+                    config);
+            doc.setSecurityConfig(configType);
         }
         return docToString(doc);
     }

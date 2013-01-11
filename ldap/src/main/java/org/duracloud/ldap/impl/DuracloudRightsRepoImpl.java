@@ -386,6 +386,16 @@ public class DuracloudRightsRepoImpl extends BaseDuracloudRepoImpl implements Du
             }
         }
 
+        if (null == accountRights) {
+            StringBuilder err = new StringBuilder();
+            err.append("No rights found for userId: ");
+            err.append(userId);
+            err.append(", and accountId: ");
+            err.append(accountId);
+            log.debug(err.toString());
+            throw new DBNotFoundException(err.toString());
+        }
+
         return accountRights;
     }
 

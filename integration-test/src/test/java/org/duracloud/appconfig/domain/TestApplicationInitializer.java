@@ -20,7 +20,9 @@ import org.junit.Test;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * This test class is placed in the 'domain' package here to have access to
@@ -171,38 +173,35 @@ public class TestApplicationInitializer extends BaseTestUtil {
     }
 
     private static Properties createSecurityProps() {
-        final int NUM_USERS = 3;
-        String[] usernames = {"username0", "username1", "username2"};
-        String[] passwords = {"password0", "password1", "password2"};
-        String[] enableds = {"true", "false", "true"};
-        String[] acctNonExpireds = {"false", "true", "false"};
-        String[] credNonExpireds = {"false", "false", "true"};
-        String[] acctNonLockeds = {"true", "true", "false"};
-        String[][] grants = {{"grant0a", "grant0b", "grant0c"},
-                             {"grant1a", "grant1b"},
-                             {"grant2a"}};
+        final int NUM_ACCTS = 3;
+
+        String basedn = "basedn";
+        String userdn = "userdn";
+        String password = "password";
+        String url = "url";
+
+        Set<Integer> acctIds = new HashSet<>();
+        for (int i = 20; i < 20 + NUM_ACCTS; ++i) {
+            acctIds.add(i);
+        }
 
         Properties props = new Properties();
         String dot = ".";
-        String prefix =
-            SecurityConfig.QUALIFIER + dot + SecurityConfig.userKey + dot;
+        String prefix = SecurityConfig.QUALIFIER + dot;
 
-        for (int i = 0; i < NUM_USERS; ++i) {
-            String p = prefix + i + dot;
-            props.put(p + SecurityConfig.usernameKey, usernames[i]);
-            props.put(p + SecurityConfig.passwordKey, passwords[i]);
-            props.put(p + SecurityConfig.enabledKey, enableds[i]);
-            props.put(p + SecurityConfig.acctNonExpiredKey, acctNonExpireds[i]);
-            props.put(p + SecurityConfig.credNonExpiredKey, credNonExpireds[i]);
-            props.put(p + SecurityConfig.acctNonLockedKey, acctNonLockeds[i]);
+        String ldapPre = prefix + SecurityConfig.ldapKey + dot;
+        props.put(ldapPre + SecurityConfig.ldapBaseDnKey, basedn);
+        props.put(ldapPre + SecurityConfig.ldapUserDnKey, userdn);
+        props.put(ldapPre + SecurityConfig.ldapPasswordKey, password);
+        props.put(ldapPre + SecurityConfig.ldapUrlKey, url);
 
-            int x = 0;
-            for (String grant : grants[i]) {
-                props.put(p + SecurityConfig.grantsKey + dot + x++, grant);
-            }
+        String acctPre = prefix + SecurityConfig.acctIdKey + dot;
+        int x = 0;
+        for (int acctId : acctIds) {
+            props.put(acctPre + x++, Integer.toString(acctId));
         }
-        return props;
 
+        return props;
     }
 
     @Test

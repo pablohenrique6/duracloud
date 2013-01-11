@@ -87,7 +87,10 @@ public class LdapImpl implements Ldap {
             roles = rights.getRoles();
 
         } catch (DBNotFoundException e) {
-            log.info("No rights found for user:{}, acctId:{}", user, accountId);
+            log.debug("No rights found for user:{}, userId:{}, acctId:{}",
+                      new Object[]{user.getUsername(),
+                                   user.getId(),
+                                   accountId});
         }
 
         if (null == roles) {

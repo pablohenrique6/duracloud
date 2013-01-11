@@ -9,14 +9,11 @@ package org.duracloud.duradmin.control;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.duracloud.common.model.Credential;
 import org.duracloud.common.web.RestHttpHelper;
 import org.duracloud.duradmin.DuradminTestBase;
 import org.duracloud.duradmin.RestTestHelper;
-import org.duracloud.common.model.SecurityUserBean;
-import org.duracloud.security.xml.SecurityUsersDocumentBinding;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -64,25 +61,12 @@ public class TestInitSecurityUsersController extends DuradminTestBase {
         caller.makeCall(status);
     }
 
+    /**
+     * This method (setting security user credentials) is no longer supported.
+     */
     private void setUserSecurity(Credential cred, List<String> grants)
         throws Exception {
-        SecurityUserBean userBean = new SecurityUserBean(cred.getUsername(),
-                                                         cred.getPassword(),
-                                                         grants);
-        List<SecurityUserBean> users = new ArrayList<SecurityUserBean>();
-        users.add(userBean);
-
-        // set duradmin security
-        final String xml = SecurityUsersDocumentBinding.createDocumentFrom(users);
-        final Map<String, String> headers = null;
-
-        // add security user
-        HttpCaller caller = new HttpCaller() {
-            protected RestHttpHelper.HttpResponse call() throws Exception {
-                return restHelper.post(securityUrl, xml, headers);
-            }
-        };
-        caller.makeCall(200);
+        // no-op
     }
 
     /**

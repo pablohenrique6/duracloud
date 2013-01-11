@@ -18,6 +18,10 @@ public class LdapConfig {
     private String ldapPassword;
     private String ldapUrl;
 
+    public LdapConfig() {
+        // default constructor
+    }
+
     public LdapConfig(String baseDn,
                       String userDn,
                       String password,
@@ -42,5 +46,21 @@ public class LdapConfig {
 
     public String getLdapUrl() {
         return ldapUrl;
+    }
+
+    public void setLdapBaseDn(String ldapBaseDn) {
+        this.ldapBaseDn = ldapBaseDn;
+    }
+
+    public void setLdapUserDn(String ldapUserDn) {
+        this.ldapUserDn = ldapUserDn;
+    }
+
+    public void setLdapPassword(String ldapPassword) {
+        this.ldapPassword = ldapPassword;
+    }
+
+    public void setLdapUrl(String ldapUrl) {
+        this.ldapUrl = ldapUrl;
     }
 }

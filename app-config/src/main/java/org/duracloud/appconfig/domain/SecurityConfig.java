@@ -9,14 +9,14 @@ package org.duracloud.appconfig.domain;
 
 import org.apache.commons.lang.StringUtils;
 import org.duracloud.common.error.DuraCloudRuntimeException;
-import org.duracloud.common.model.SecurityUserBean;
-import org.duracloud.security.xml.SecurityUsersDocumentBinding;
+import org.duracloud.ldap.domain.LdapConfig;
+import org.duracloud.security.domain.SecurityConfigBean;
+import org.duracloud.security.xml.SecurityDocumentBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This class holds the configuration elements for application security.
@@ -30,21 +30,22 @@ public class SecurityConfig extends BaseConfig implements AppConfig {
     private final static String INIT_RESOURCE = "/security";
 
     protected final static String QUALIFIER = "security";
-    protected final static String userKey = "user";
-    protected final static String usernameKey = "username";
-    protected final static String passwordKey = "password";
-    protected final static String enabledKey = "enabled";
-    protected final static String emailKey = "email";
-    protected final static String acctNonExpiredKey = "acct-non-expired";
-    protected final static String credNonExpiredKey = "cred-non-expired";
-    protected final static String acctNonLockedKey = "acct-non-locked";
-    protected final static String grantsKey = "grants";
-    protected final static String groupsKey = "groups";
+    protected final static String acctIdKey = "acct-id";
 
-    private Map<String, SecurityUserBean> users = new HashMap<String, SecurityUserBean>();
+    protected final static String ldapKey = "ldap";
+    protected final static String ldapBaseDnKey = "basedn";
+    protected final static String ldapUserDnKey = "userdn";
+    protected final static String ldapPasswordKey = "password";
+    protected final static String ldapUrlKey = "url";
+
+    private LdapConfig ldapConfig = new LdapConfig();
+    private Set<Integer> acctIds = new HashSet<>();
+
 
     public String asXml() {
-        return SecurityUsersDocumentBinding.createDocumentFrom(getUsers());
+        return SecurityDocumentBinding.createDocumentFrom(new SecurityConfigBean(
+            ldapConfig,
+            acctIds));
     }
 
     public String getInitResource() {
@@ -58,9 +59,13 @@ public class SecurityConfig extends BaseConfig implements AppConfig {
     protected void loadProperty(String key, String value) {
         key = key.toLowerCase();
         String prefix = getPrefix(key);
-        if (prefix.equalsIgnoreCase(userKey)) {
+        if (prefix.equalsIgnoreCase(ldapKey)) {
             String suffix = getSuffix(key);
-            loadUser(suffix, value);
+            loadLdap(suffix, value);
+
+        } else if (prefix.equalsIgnoreCase(acctIdKey)) {
+            String suffix = getSuffix(key);
+            loadAccts(suffix, value);
 
         } else {
             String msg = "unknown key: " + key + " (" + value + ")";
@@ -69,58 +74,53 @@ public class SecurityConfig extends BaseConfig implements AppConfig {
         }
     }
 
-    private void loadUser(String key, String value) {
-        String id = getPrefix(key);
-        SecurityUserBean user = users.get(id);
-        if (null == user) {
-            user = new SecurityUserBean();
-        }
+    private void loadLdap(String key, String value) {
+        if (key.equalsIgnoreCase(ldapBaseDnKey)) {
+            ldapConfig.setLdapBaseDn(value);
 
-        String suffix = key.substring(id.length() + 1).toLowerCase();
-        if (StringUtils.isBlank(suffix)) {
-            String msg = "invalid key: " + key + " (" + value + ")";
-            log.error(msg);
-            throw new DuraCloudRuntimeException(msg);
-        }
+        } else if (key.equalsIgnoreCase(ldapUserDnKey)) {
+            ldapConfig.setLdapUserDn(value);
 
-        if (suffix.equalsIgnoreCase(usernameKey)) {
-            user.setUsername(value);
+        } else if (key.equalsIgnoreCase(ldapPasswordKey)) {
+            ldapConfig.setLdapPassword(value);
 
-        } else if (suffix.equalsIgnoreCase(passwordKey)) {
-            user.setPassword(value);
-
-        } else if (suffix.equalsIgnoreCase(enabledKey)) {
-            user.setEnabled(Boolean.valueOf(value));
-
-        } else if (suffix.equalsIgnoreCase(emailKey)) {
-            user.setEmail(value);
-
-        } else if (suffix.equalsIgnoreCase(acctNonExpiredKey)) {
-            user.setAccountNonExpired(Boolean.valueOf(value));
-
-        } else if (suffix.equalsIgnoreCase(credNonExpiredKey)) {
-            user.setCredentialsNonExpired(Boolean.valueOf(value));
-
-        } else if (suffix.equalsIgnoreCase(acctNonLockedKey)) {
-            user.setAccountNonLocked(Boolean.valueOf(value));
-
-        } else if (suffix.startsWith(grantsKey)) {
-            user.addGrantedAuthority(value);
-
-        } else if (suffix.startsWith(groupsKey)) {
-            user.addGroup(value);
+        } else if (key.equalsIgnoreCase(ldapUrlKey)) {
+            ldapConfig.setLdapUrl(value);
 
         } else {
             String msg = "unknown user key: " + key + " (" + value + ")";
             log.error(msg);
             throw new DuraCloudRuntimeException(msg);
         }
-
-        users.put(id, user);
     }
 
-    public Collection<SecurityUserBean> getUsers() {
-        return users.values();
+    private void loadAccts(String key, String value) {
+        String index = getSuffix(key);
+
+        if (StringUtils.isBlank(index)) {
+            String msg = "invalid key: " + key + " (" + value + ")";
+            log.error(msg);
+            throw new DuraCloudRuntimeException(msg);
+        }
+
+        int acctId;
+        try {
+            acctId = Integer.parseInt(value);
+
+        } catch (NumberFormatException e) {
+            String msg = "Invalid acctId key: " + key + " (" + value + ")";
+            log.error(msg);
+            throw new DuraCloudRuntimeException(msg, e);
+        }
+
+        acctIds.add(acctId);
     }
 
+    public LdapConfig getLdapConfig() {
+        return ldapConfig;
+    }
+
+    public Set<Integer> getAcctIds() {
+        return acctIds;
+    }
 }

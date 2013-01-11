@@ -95,7 +95,7 @@
   <bean id="serviceController" class="org.duracloud.duradmin.services.controller.ServiceController">
     <property name="servicesManager" ref="servicesManager" />
   </bean>
-  <bean id="initSecurityUsersController" class="org.duracloud.duradmin.control.InitSecurityUsersController">
+  <bean id="initSecurityUsersController" class="org.duracloud.duradmin.control.InitSecurityController">
     <constructor-arg ref="userDetailsSvc" />
   </bean>
   <bean id="manageSecurityUsersController" class="org.duracloud.duradmin.control.ManageSecurityUsersController">

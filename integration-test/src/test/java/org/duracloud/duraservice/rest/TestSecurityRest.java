@@ -11,7 +11,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.duracloud.common.model.Credential;
 import org.duracloud.common.web.RestHttpHelper;
 import org.duracloud.common.model.SecurityUserBean;
-import org.duracloud.security.xml.SecurityUsersDocumentBinding;
+import org.duracloud.security.xml.SecurityDocumentBinding;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
@@ -85,19 +85,13 @@ public class TestSecurityRest {
         doSetUserSecurity(baseStoreUrl, users);
     }
 
+    /**
+     * Note:
+     * This method (setting user security credentials) is no longer supported.
+     */
     private void doSetUserSecurity(String baseUrl, List<SecurityUserBean> users)
         throws Exception {
-        final String url = baseUrl + "/security";
-        final String xml = SecurityUsersDocumentBinding.createDocumentFrom(users);
-        final Map<String, String> headers = null;
-
-        // add security user
-        HttpCaller caller = new HttpCaller() {
-            protected RestHttpHelper.HttpResponse call() throws Exception {
-                return restHelper.post(url, xml, headers);
-            }
-        };
-        caller.makeCall(200);
+        // no-op
     }
 
     /**

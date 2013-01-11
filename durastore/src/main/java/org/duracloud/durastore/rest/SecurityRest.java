@@ -9,16 +9,15 @@ package org.duracloud.durastore.rest;
 
 import org.duracloud.common.rest.RestUtil;
 import org.duracloud.security.DuracloudUserDetailsService;
-import org.duracloud.common.model.SecurityUserBean;
+import org.duracloud.security.domain.SecurityConfigBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.duracloud.security.xml.SecurityUsersDocumentBinding.createSecurityUsersFrom;
+import static org.duracloud.security.xml.SecurityDocumentBinding.createSecurityConfigFrom;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
-import java.util.List;
 
 /**
  * @author Andrew Woods
@@ -41,8 +40,10 @@ public class SecurityRest extends BaseRest {
         RestUtil.RequestContent content = null;
         try {
             content = restUtil.getRequestContent(request, headers);
-            List<SecurityUserBean> users = createSecurityUsersFrom(content.getContentStream());
-            userDetailsService.setUsers(users);
+            SecurityConfigBean config =
+                createSecurityConfigFrom(content.getContentStream());
+            userDetailsService.initialize(config.getLdapConfig(),
+                                          config.getAcctIds());
 
             String responseText = "Initialization Successful\n";
             return Response.ok(responseText, TEXT_PLAIN).build();

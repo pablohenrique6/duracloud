@@ -11,13 +11,12 @@ import org.duracloud.common.error.DuraCloudRuntimeException;
 import org.duracloud.common.model.RootUserCredential;
 import org.duracloud.common.util.ExceptionUtil;
 import org.duracloud.common.web.RestHttpHelper;
-import org.duracloud.common.model.SecurityUserBean;
-import org.duracloud.security.xml.SecurityUsersDocumentBinding;
+import org.duracloud.security.domain.SecurityConfigBean;
+import org.duracloud.security.xml.SecurityDocumentBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.Collection;
 
 /**
  * This class provides an abstraction of an application that is reachable
@@ -73,14 +72,14 @@ public class Application {
     }
 
     /**
-     * This method sets the security users of this application to the provided
+     * This method sets the security config of this application to the provided
      * users.
      *
-     * @param users
-     * @return
+     * @param config for application security
+     * @return response of http request
      */
-    public RestHttpHelper.HttpResponse setSecurityUsers(Collection<SecurityUserBean> users) {
-        String xml = SecurityUsersDocumentBinding.createDocumentFrom(users);
+    public RestHttpHelper.HttpResponse setSecurityConfig(SecurityConfigBean config) {
+        String xml = SecurityDocumentBinding.createDocumentFrom(config);
         try {
             Map<String, String> headers = null;
             return getRestHelper().post(getSecurityUrl(), xml, headers);

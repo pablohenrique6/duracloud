@@ -96,25 +96,7 @@ public class ManageSecurityUsersController extends AbstractCommandController {
     private ModelAndView saveAndReturnModel(SecurityUserCommand cmd,
                                             SecurityUserBean user)
         throws Exception {
-        pushUpdates(cmd.getUsers());
-        user.setPassword("*********");
         return new ModelAndView("jsonView", "user", user);
-    }
-
-    private void pushUpdates(List<SecurityUserBean> users) throws Exception {
-        // update duradmin.
-        userDetailsService.setUsers(users);
-        log.debug("pushed updates to user details service");
-
-        // update durastore.
-        Application durastore = getDuraStoreApp();
-        durastore.setSecurityUsers(users);
-        log.debug("pushed updates to durastore");
-
-        // update duraservice
-        Application duraservice = getDuraServiceApp();
-        duraservice.setSecurityUsers(users);
-        log.debug("pushed updates to duraservice");
     }
 
     private Application getDuraStoreApp() {

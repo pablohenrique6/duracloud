@@ -38,7 +38,7 @@ public class ApplicationInitDriver {
         }
 
         ApplicationInitializer appInit = new ApplicationInitializer(propsFile);
-        appInit.setSecurityUsers();
+        appInit.setSecurityConfig();
         appInit.initialize();
         if (dir != null) {
             appInit.outputXml(dir);
