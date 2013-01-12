@@ -42,6 +42,7 @@ public class DuracloudRepoMgrImpl implements DuracloudRepoMgr {
     public void initialize(LdapConfig config) {
         log.info("initializing");
 
+        this.ldapTemplate = null;
         this.ldapTemplate = createLdapTemplate(config);
 
         // LDAP repos

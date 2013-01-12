@@ -13,8 +13,6 @@ import org.duracloud.ldap.DuracloudRepoMgr;
 import org.duracloud.ldap.DuracloudRightsRepo;
 import org.duracloud.ldap.DuracloudUserRepo;
 import org.duracloud.ldap.Ldap;
-import org.duracloud.ldap.converter.DomainConverter;
-import org.duracloud.ldap.converter.DuracloudUserConverter;
 import org.duracloud.ldap.domain.AccountRights;
 import org.duracloud.ldap.domain.DuracloudGroup;
 import org.duracloud.ldap.domain.DuracloudUser;
@@ -39,11 +37,8 @@ public class LdapImpl implements Ldap {
 
     private DuracloudRepoMgr repoMgr;
 
-    private DomainConverter<DuracloudUser> converter;
-
     public LdapImpl(DuracloudRepoMgr repoMgr) {
         this.repoMgr = repoMgr;
-        this.converter = new DuracloudUserConverter();
     }
 
     @Override
@@ -140,8 +135,7 @@ public class LdapImpl implements Ldap {
         // Get all Rights for all arg accounts.
         Set<AccountRights> allRights = new HashSet<AccountRights>();
         for (int accountId : accountIds) {
-            Set<AccountRights> rights = rightsRepo().findByAccountId(
-                accountId);
+            Set<AccountRights> rights = rightsRepo().findByAccountId(accountId);
 
             if (null != rights) {
                 allRights.addAll(rights);

@@ -56,8 +56,12 @@
     <beans:constructor-arg ref="repoMgr"/>
   </beans:bean>
 
+  <beans:bean id="ldapCache" class="org.duracloud.ldap.impl.LdapCachingImpl">
+      <beans:constructor-arg ref="ldap"/>
+    </beans:bean>
+
   <beans:bean id="userDetailsSvc" class="org.duracloud.security.impl.UserDetailsServiceLdapImpl">
-    <beans:constructor-arg ref="ldap"/>
+    <beans:constructor-arg ref="ldapCache"/>
   </beans:bean>
 
 
