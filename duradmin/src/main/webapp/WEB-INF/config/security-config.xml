@@ -10,37 +10,37 @@
     <filter-chain-map path-type="ant">
       <!--REST endpoints-->
       <filter-chain pattern="/init"
-                    filters="httpSessionContextIntegrationFilter,logoutFilter,authenticationProcessingFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
+                    filters="httpSessionContextIntegrationFilter,logoutFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
       <filter-chain pattern="/security"
-                    filters="httpSessionContextIntegrationFilter,logoutFilter,authenticationProcessingFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
+                    filters="httpSessionContextIntegrationFilter,logoutFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
 
       <!--Admin/Root endpoints-->
       <filter-chain pattern="/dashboard"
-                    filters="httpSessionContextIntegrationFilter,logoutFilter,authenticationProcessingFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
+                    filters="httpSessionContextIntegrationFilter,logoutFilter,requestHeaderAuthenticationFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
       <filter-chain pattern="/admin"
-                    filters="httpSessionContextIntegrationFilter,logoutFilter,authenticationProcessingFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
+                    filters="httpSessionContextIntegrationFilter,logoutFilter,requestHeaderAuthenticationFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
       <filter-chain pattern="/services**"
-                    filters="httpSessionContextIntegrationFilter,logoutFilter,authenticationProcessingFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
+                    filters="httpSessionContextIntegrationFilter,logoutFilter,requestHeaderAuthenticationFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
 
       <!--Open endpoints-->
       <filter-chain pattern="/login*"
-                    filters="httpSessionContextIntegrationFilter,logoutFilter,authenticationProcessingFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
+                    filters="httpSessionContextIntegrationFilter,logoutFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
       <filter-chain pattern="/style/**"
-                    filters="httpSessionContextIntegrationFilter,logoutFilter,authenticationProcessingFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
+                    filters="httpSessionContextIntegrationFilter,logoutFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
       <filter-chain pattern="/images/**"
-                    filters="httpSessionContextIntegrationFilter,logoutFilter,authenticationProcessingFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
+                    filters="httpSessionContextIntegrationFilter,logoutFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
       <filter-chain pattern="/js/**"
-                    filters="httpSessionContextIntegrationFilter,logoutFilter,authenticationProcessingFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
+                    filters="httpSessionContextIntegrationFilter,logoutFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
       <filter-chain pattern="/jquery/**"
-                    filters="httpSessionContextIntegrationFilter,logoutFilter,authenticationProcessingFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
+                    filters="httpSessionContextIntegrationFilter,logoutFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
       <filter-chain pattern="/favicon.ico"
-                    filters="httpSessionContextIntegrationFilter,logoutFilter,authenticationProcessingFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
+                    filters="httpSessionContextIntegrationFilter,logoutFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
       <filter-chain pattern="/webstart/**"
-                    filters="httpSessionContextIntegrationFilter,logoutFilter,authenticationProcessingFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
+                    filters="httpSessionContextIntegrationFilter,logoutFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
 
       <!--Catch-all-->
       <filter-chain pattern="/**"
-                    filters="httpSessionContextIntegrationFilter,logoutFilter,authenticationProcessingFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
+                    filters="httpSessionContextIntegrationFilter,logoutFilter,requestHeaderAuthenticationFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
     </filter-chain-map>
   </beans:bean>
 
@@ -56,8 +56,7 @@
     <beans:constructor-arg index="1">
       <beans:list>
         <beans:ref bean="securityContextLogoutHandler"/>
-        <!--todo: for shib-->
-        <!--<beans:ref bean="shibLogoutHandler"/>-->
+        <beans:ref bean="shibLogoutHandler"/>
       </beans:list>
     </beans:constructor-arg>
     <beans:property name="filterProcessesUrl" value="/logout"/>
@@ -67,25 +66,13 @@
     <beans:property name="invalidateHttpSession" value="true"/>
   </beans:bean>
 
-  <!--todo: for shib-->
-  <!--<beans:bean id="shibLogoutHandler" class="org.duracloud.duradmin.security.ShibLogoutHandler"/>-->
+  <beans:bean id="shibLogoutHandler" class="org.duracloud.duradmin.security.ShibLogoutHandler"/>
 
-  <!--todo: remove later-->
-  <beans:bean id="authenticationProcessingFilter"
-              class="org.springframework.security.ui.webapp.AuthenticationProcessingFilter">
-    <beans:property name="authenticationManager" ref="authenticationManager" />
-    <beans:property name="authenticationFailureUrl" value=""/>
-    <beans:property name="defaultTargetUrl" value="/" />
-    <beans:property name="alwaysUseDefaultTargetUrl" value="false"/>
-    <beans:property name="filterProcessesUrl" value="/j_spring_security_check" />
+  <beans:bean id="requestHeaderAuthenticationFilter"
+              class="org.springframework.security.ui.preauth.header.RequestHeaderPreAuthenticatedProcessingFilter ">
+    <beans:property name="principalRequestHeader" value="REMOTE_USER"/>
+    <beans:property name="authenticationManager" ref="authenticationManager"/>
   </beans:bean>
-
-  <!--todo: remove later-->
-  <beans:bean id="authenticationProcessingFilterEntryPoint"
-              class="org.springframework.security.ui.webapp.AuthenticationProcessingFilterEntryPoint">
-		<beans:property name="loginFormUrl" value="/login" />
-		<beans:property name="serverSideRedirect" value="true" />
-	</beans:bean>
 
   <!--Filter: basic-auth-->
   <beans:bean id="basicProcessingFilter"
@@ -102,9 +89,12 @@
   <!--Filter: directs authN/Z exceptions-->
   <beans:bean id="exceptionTranslationFilter"
               class="org.springframework.security.ui.ExceptionTranslationFilter">
-    <beans:property name="authenticationEntryPoint" ref="authenticationProcessingFilterEntryPoint"/>
+    <beans:property name="authenticationEntryPoint" ref="http403ForbiddenEntryPoint"/>
     <beans:property name="accessDeniedHandler" ref="accessDeniedHandler"/>
   </beans:bean>
+
+  <beans:bean id="http403ForbiddenEntryPoint"
+              class="org.springframework.security.ui.preauth.PreAuthenticatedProcessingFilterEntryPoint"/>
 
   <beans:bean id="accessDeniedHandler" class="org.springframework.security.ui.AccessDeniedHandlerImpl">
     <beans:property name="errorPage" value="/fix-me"/>
@@ -139,69 +129,51 @@
     </beans:property>
   </beans:bean>
 
-
-
-
-
-
-  <!--Security Filters for REST endpoints-->
-
-  <!--Security Filters for Browser/Shib endpoints-->
-  <!--todo: for shib-->
-  <!--<http auto-config="false" entry-point-ref="http403ForbiddenEntryPoint">-->
-    <!--<intercept-url pattern="/dashboard" access="ROLE_ROOT"/>-->
-    <!--<intercept-url pattern="/admin" access="ROLE_ROOT"/>-->
-    <!--<intercept-url pattern="/services**" access="ROLE_ADMIN"/>-->
-    <!--<intercept-url pattern="/**" access="ROLE_USER"/>-->
-
-    <!--&lt;!&ndash;<logout invalidate-session="true" logout-url="/logout" logout-success-url="/shiblogout"/>&ndash;&gt;-->
-  <!--</http>-->
-
-  <!--todo: for shib-->
-  <!--<beans:bean id="http403ForbiddenEntryPoint"-->
-                <!--class="org.springframework.security.ui.preauth.PreAuthenticatedProcessingFilterEntryPoint"/>-->
-
-  <!--todo: for shib-->
-  <!--<beans:bean id="requestHeaderAuthenticationFilter"-->
-              <!--class="org.springframework.security.ui.preauth.header.RequestHeaderPreAuthenticatedProcessingFilter ">-->
-    <!--<custom-filter position="PRE_AUTH_FILTER"/>-->
-    <!--<beans:property name="principalRequestHeader" value="REMOTE_USER"/>-->
-    <!--<beans:property name="authenticationManager" ref="authenticationManager"/>-->
-  <!--</beans:bean>-->
-
-
-
   <!-- AuthN Manager -->
-  <authentication-manager alias="authenticationManager"/>
-  <authentication-provider user-service-ref="userDetailsSvc">
-    <password-encoder ref="passwordEncoder"/>
-  </authentication-provider>
-  <authentication-provider user-service-ref="userDetailsSvc"/>
+  <beans:bean id="authenticationManager" class="org.springframework.security.providers.ProviderManager">
+    <beans:property name="providers">
+      <beans:list>
+        <beans:ref bean="preauthAuthProvider"/>
+        <beans:ref bean="basicAuthProvider"/>
+      </beans:list>
+    </beans:property>
+  </beans:bean>
 
   <beans:bean id="accessDecisionManager"
               class="org.springframework.security.vote.AffirmativeBased">
     <beans:property name="decisionVoters">
       <beans:list>
         <beans:bean class="org.springframework.security.vote.RoleVoter"/>
-        <beans:bean
-          class="org.springframework.security.vote.AuthenticatedVoter"/>
+        <beans:bean class="org.springframework.security.vote.AuthenticatedVoter"/>
       </beans:list>
     </beans:property>
   </beans:bean>
 
+  <beans:bean id="preauthAuthProvider"
+              class="org.springframework.security.providers.preauth.PreAuthenticatedAuthenticationProvider">
+    <!--adds pre-auth-provider to namespace authentication-provider above-->
+    <custom-authentication-provider />
+    <beans:property name="preAuthenticatedUserDetailsService">
+      <beans:bean id="userDetailsServiceWrapper"
+                  class="org.springframework.security.userdetails.UserDetailsByNameServiceWrapper">
+        <beans:property name="userDetailsService" ref="userDetailsSvc"/>
+      </beans:bean>
+    </beans:property>
+  </beans:bean>
 
-  <!--todo: for shib-->
-  <!--<beans:bean id="preauthAuthProvider"-->
-              <!--class="org.springframework.security.providers.preauth.PreAuthenticatedAuthenticationProvider">-->
-    <!--&lt;!&ndash;adds pre-auth-provider to namespace authentication-provider above&ndash;&gt;-->
-    <!--<custom-authentication-provider />-->
-    <!--<beans:property name="preAuthenticatedUserDetailsService">-->
-      <!--<beans:bean id="userDetailsServiceWrapper"-->
-                  <!--class="org.springframework.security.userdetails.UserDetailsByNameServiceWrapper">-->
-        <!--<beans:property name="userDetailsService" ref="userDetailsSvc"/>-->
-      <!--</beans:bean>-->
-    <!--</beans:property>-->
-  <!--</beans:bean>-->
+  <beans:bean id="basicAuthProvider" class="org.springframework.security.providers.dao.DaoAuthenticationProvider">
+    <beans:property name="userDetailsService" ref="userDetailsSvc"/>
+    <beans:property name="passwordEncoder" ref="passwordEncoder"/>
+  </beans:bean>
+
+  <beans:bean id="userDetailsSvc" class="org.duracloud.security.impl.UserDetailsServiceLdapImpl">
+    <beans:constructor-arg ref="ldapCache"/>
+  </beans:bean>
+
+  <beans:bean id="passwordEncoder"
+    class="org.springframework.security.providers.encoding.ShaPasswordEncoder" >
+   <beans:constructor-arg value="256"/>
+  </beans:bean>
 
   <!--LDAP Setup-->
   <beans:bean id="repoMgr" class="org.duracloud.ldap.impl.DuracloudRepoMgrImpl"/>
@@ -213,16 +185,6 @@
   <beans:bean id="ldapCache" class="org.duracloud.ldap.impl.LdapCachingImpl">
       <beans:constructor-arg ref="ldap"/>
     </beans:bean>
-
-  <beans:bean id="userDetailsSvc" class="org.duracloud.security.impl.UserDetailsServiceLdapImpl">
-    <beans:constructor-arg ref="ldapCache"/>
-  </beans:bean>
-
-
-  <beans:bean id="passwordEncoder"
-    class="org.springframework.security.providers.encoding.ShaPasswordEncoder" >
-   <beans:constructor-arg value="256"/>
-  </beans:bean>
 
   <!-- AOP to log(in/out) ContentStoreMgr and ServicesMgr -->
   <beans:bean id="securityContextUtil" class="org.duracloud.security.context.SecurityContextUtil"/>
