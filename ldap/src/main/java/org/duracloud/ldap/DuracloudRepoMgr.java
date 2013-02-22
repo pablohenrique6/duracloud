@@ -22,4 +22,6 @@ public interface DuracloudRepoMgr {
     public DuracloudGroupRepo getGroupRepo();
 
     public DuracloudRightsRepo getRightsRepo();
+
+    public IdUtil getIdUtil();
 }

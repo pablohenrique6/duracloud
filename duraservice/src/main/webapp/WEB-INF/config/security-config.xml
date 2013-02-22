@@ -51,7 +51,11 @@
   <authentication-provider user-service-ref="userDetailsSvc"/>
 
   <!--LDAP Setup-->
-  <beans:bean id="repoMgr" class="org.duracloud.ldap.impl.DuracloudRepoMgrImpl"/>
+  <beans:bean id="idUtil" class="org.duracloud.ldap.impl.IdUtilImpl"/>
+
+  <beans:bean id="repoMgr" class="org.duracloud.ldap.impl.DuracloudRepoMgrImpl">
+    <beans:constructor-arg ref="idUtil"/>
+  </beans:bean>
 
   <beans:bean id="ldap" class="org.duracloud.ldap.impl.LdapImpl">
     <beans:constructor-arg ref="repoMgr"/>

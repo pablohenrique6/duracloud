@@ -11,6 +11,7 @@ import org.duracloud.ldap.DuracloudGroupRepo;
 import org.duracloud.ldap.DuracloudRepoMgr;
 import org.duracloud.ldap.DuracloudRightsRepo;
 import org.duracloud.ldap.DuracloudUserRepo;
+import org.duracloud.ldap.IdUtil;
 import org.duracloud.ldap.domain.LdapConfig;
 import org.duracloud.ldap.error.DBUninitializedException;
 import org.duracloud.ldap.error.DuracloudLdapException;
@@ -37,6 +38,11 @@ public class DuracloudRepoMgrImpl implements DuracloudRepoMgr {
     private DuracloudRightsRepo rightsRepo;
 
     private LdapTemplate ldapTemplate;
+    private IdUtil idUtil;
+
+    public DuracloudRepoMgrImpl(IdUtil idUtil) {
+        this.idUtil = idUtil;
+    }
 
     @Override
     public void initialize(LdapConfig config) {
@@ -108,4 +114,7 @@ public class DuracloudRepoMgrImpl implements DuracloudRepoMgr {
         this.ldapTemplate = ldapTemplate;
     }
 
+    public IdUtil getIdUtil() {
+        return idUtil;
+    }
 }

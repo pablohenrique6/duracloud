@@ -3,15 +3,13 @@
  */
 package org.duracloud.ldap.impl;
 
-import org.duracloud.ldap.DuracloudUserRepo;
+import org.duracloud.common.error.DuraCloudRuntimeException;
+import org.duracloud.common.web.RestHttpHelper;
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Andrew Woods
@@ -21,41 +19,88 @@ public class IdUtilImplTest {
 
     private IdUtilImpl idUtil;
 
-    private DuracloudUserRepo userRepo;
+    private static final String host = "host";
+    private static final String port = "port";
+    private static final String context = "context";
 
-    private static final int COUNT = 5;
+    private RestHttpHelper restHelper;
+    private RestHttpHelper.HttpResponse response;
 
     @Before
     public void setUp() throws Exception {
-        userRepo = createMockUserRepo(COUNT);
+        restHelper = EasyMock.createMock("RestHttpHelper",
+                                         RestHttpHelper.class);
+        response = EasyMock.createMock("HttpResponse",
+                                       RestHttpHelper.HttpResponse.class);
 
         idUtil = new IdUtilImpl();
-        idUtil.initialize(userRepo);
-    }
-
-    private DuracloudUserRepo createMockUserRepo(int count) {
-        DuracloudUserRepo repo = EasyMock.createMock(DuracloudUserRepo.class);
-        EasyMock.expect(repo.getIds()).andReturn(createIds(count));
-        EasyMock.replay(repo);
-        return repo;
-    }
-
-    private Set<Integer> createIds(int count) {
-        Set<Integer> ids = new HashSet<Integer>();
-        for (int i = 1; i < count; ++i) {
-            ids.add(-i);
-        }
-        return ids;
+        idUtil.initialize(host, port, context, restHelper);
     }
 
     @After
     public void tearDown() throws Exception {
-        EasyMock.verify(userRepo);
+        EasyMock.verify(restHelper, response);
+    }
+
+    private void replayMocks() {
+        EasyMock.replay(restHelper, response);
     }
 
     @Test
     public void testNewUserId() throws Exception {
-        Assert.assertEquals(-COUNT, idUtil.newUserId());
+        Integer id = 7;
+        createMocks(id.toString(), "user");
+        replayMocks();
+
+        Integer result = idUtil.newUserId();
+        Assert.assertEquals(id, result);
+    }
+
+    @Test
+    public void testNewUserIdError() throws Exception {
+        createMocks("not a number", "user");
+        replayMocks();
+
+        boolean thrown = false;
+        try {
+            idUtil.newUserId();
+            Assert.fail("exception expected");
+        } catch (DuraCloudRuntimeException e) {
+            thrown = true;
+        }
+        Assert.assertTrue(thrown);
+    }
+
+    @Test
+    public void testNewRightsId() throws Exception {
+        Integer id = 7;
+        createMocks(id.toString(), "rights");
+        replayMocks();
+
+        Integer result = idUtil.newRightsId();
+        Assert.assertEquals(id, result);
+    }
+
+    @Test
+    public void testNewRightsIdError() throws Exception {
+        createMocks("not a number", "rights");
+        replayMocks();
+
+        boolean thrown = false;
+        try {
+            idUtil.newRightsId();
+            Assert.fail("exception expected");
+        } catch (DuraCloudRuntimeException e) {
+            thrown = true;
+        }
+        Assert.assertTrue(thrown);
+    }
+
+    private void createMocks(String id, String resource) throws Exception {
+        EasyMock.expect(response.getResponseBody()).andReturn(id);
+        EasyMock.expect(restHelper.post("http://" + host + ":" + port + "/" + context + "/" + resource,
+                                        null,
+                                        null)).andReturn(response);
     }
 
 }

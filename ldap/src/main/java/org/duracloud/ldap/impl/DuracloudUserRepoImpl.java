@@ -114,9 +114,9 @@ public class DuracloudUserRepoImpl extends BaseDuracloudRepoImpl implements Dura
             ldapTemplate.bind(dn.toString(), null, attrs);
 
         } catch (NameNotFoundException e) {
-            log.warn("Item not saved: {}", item, e);
+            log.warn("Item not saved: {}, msg: {}", item, e.getMessage());
         } catch (NameAlreadyBoundException e) {
-            log.info("Updating item: {}", item, e);
+            log.info("Updating item: {}, msg: {}", item, e.getMessage());
             ldapTemplate.rebind(dn.toString(), null, attrs);
         }
     }

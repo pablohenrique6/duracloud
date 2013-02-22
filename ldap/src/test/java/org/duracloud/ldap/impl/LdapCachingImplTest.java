@@ -11,6 +11,7 @@ import junit.framework.Assert;
 import org.duracloud.common.model.SecurityUserBean;
 import org.duracloud.ldap.Ldap;
 import org.duracloud.ldap.domain.LdapConfig;
+import org.duracloud.ldap.error.DBNotFoundException;
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
@@ -153,4 +154,87 @@ public class LdapCachingImplTest {
         Assert.assertNotNull(users);
         Assert.assertEquals(beans.size(), users.size());
     }
+
+    @Test
+    public void testGetAccountId() throws Exception {
+        String institution = "ncsu";
+        int id = 4;
+        EasyMock.expect(target.getAccountId(institution))
+                .andReturn(id)
+                .times(2);
+
+        replayMocks();
+
+        // Perform test.
+        int result = cache.getAccountId(institution);
+        Assert.assertEquals(id, result);
+
+        // Will hit cache.
+        result = cache.getAccountId(institution);
+        Assert.assertEquals(id, result);
+
+        // Let cache expire.
+        Thread.sleep(refreshSeconds * 1000);
+        result = cache.getAccountId(institution);
+        Assert.assertEquals(id, result);
+    }
+
+    @Test
+    public void testGetAccountIdError() throws Exception {
+        String institution = "junk";
+        EasyMock.expect(target.getAccountId(institution))
+                .andThrow(new DBNotFoundException("canned-exception"));
+        replayMocks();
+
+        boolean thrown = false;
+        try {
+            cache.getAccountId(institution);
+            Assert.fail("exception expected");
+        } catch (DBNotFoundException e) {
+            thrown = true;
+        }
+        Assert.assertTrue(thrown);
+    }
+
+    @Test
+    public void testGetAccountIdNull() throws Exception {
+        String institution = null;
+        replayMocks();
+
+        boolean thrown = false;
+        try {
+            cache.getAccountId(institution);
+            Assert.fail("exception expected");
+        } catch (DBNotFoundException e) {
+            thrown = true;
+        }
+        Assert.assertTrue(thrown);
+    }
+
+    @Test
+    public void testSaveSecurityUser() throws Exception {
+        int acctId = 6;
+        Set<Integer> acctIds = new HashSet<>();
+        acctIds.add(acctId);
+        SecurityUserBean user = new SecurityUserBean();
+        user.setUsername("user-name");
+
+        EasyMock.expect(target.getSecurityUser(user.getUsername(), acctIds))
+                .andReturn(user);
+
+        target.saveSecurityUser(user, acctId);
+        EasyMock.expectLastCall();
+
+        replayMocks();
+
+        // Ensure cache not hit.
+        cache.getSecurityUser(user.getUsername(), acctIds);
+
+        // Perform test.
+        cache.saveSecurityUser(user, acctId);
+
+        // Ensure cache is hit.
+        cache.getSecurityUser(user.getUsername(), acctIds);
+    }
+
 }

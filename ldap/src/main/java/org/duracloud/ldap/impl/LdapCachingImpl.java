@@ -39,6 +39,7 @@ public class LdapCachingImpl implements Ldap {
 
     private Map<String, SecurityUserBean> singleUsers;
     private Map<String, SecurityUserBean> allUsers;
+    private Map<String, Integer> acctIds; // institution -> acctId
 
     public LdapCachingImpl(Ldap target) {
         this(target, 600 /*ten minutes*/);
@@ -49,6 +50,7 @@ public class LdapCachingImpl implements Ldap {
         this.target = target;
         this.singleUsers = new HashMap<>();
         this.allUsers = new HashMap<>();
+        this.acctIds = new HashMap<>();
     }
 
     @Override
@@ -64,6 +66,7 @@ public class LdapCachingImpl implements Ldap {
             lastRefresh = now;
             singleUsers.clear();
             allUsers.clear();
+            acctIds.clear();
         }
     }
 
@@ -110,4 +113,40 @@ public class LdapCachingImpl implements Ldap {
 
         return new ArrayList<>(allUsers.values());
     }
+
+    @Override
+    public int getAccountId(String institution) throws DBNotFoundException {
+        long start = System.currentTimeMillis();
+        refreshCache();
+
+        if (null == institution) {
+            throw new DBNotFoundException("Institution arg is null!");
+        }
+
+        Integer id = acctIds.get(institution.toLowerCase());
+        if (null == id) {
+            id = target.getAccountId(institution);
+            acctIds.put(institution, id);
+        }
+
+        log.debug("getAccountId: {}, elapsed millis: {}",
+                  institution,
+                  System.currentTimeMillis() - start);
+
+        return id;
+    }
+
+    @Override
+    public void saveSecurityUser(SecurityUserBean user, int acctId) {
+        long start = System.currentTimeMillis();
+        refreshCache();
+
+        target.saveSecurityUser(user, acctId);
+        singleUsers.put(user.getUsername(), user);
+
+        log.debug("saveSecurityUser: {}, elapsed millis: {}",
+                  user,
+                  System.currentTimeMillis() - start);
+    }
+
 }

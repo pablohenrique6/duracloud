@@ -48,4 +48,8 @@ public interface Ldap {
      * @return list of users
      */
     public List<SecurityUserBean> getSecurityUsers(Set<Integer> accountIds);
+
+    public int getAccountId(String institution) throws DBNotFoundException;
+
+    public void saveSecurityUser(SecurityUserBean user, int acctId);
 }

@@ -13,6 +13,7 @@ import org.duracloud.ldap.DuracloudGroupRepo;
 import org.duracloud.ldap.DuracloudRepoMgr;
 import org.duracloud.ldap.DuracloudRightsRepo;
 import org.duracloud.ldap.DuracloudUserRepo;
+import org.duracloud.ldap.IdUtil;
 import org.duracloud.ldap.domain.AccountRights;
 import org.duracloud.ldap.domain.DuracloudGroup;
 import org.duracloud.ldap.domain.DuracloudUser;
@@ -43,6 +44,7 @@ public class LdapImplTest {
     private DuracloudUserRepo userRepo;
     private DuracloudGroupRepo groupRepo;
     private DuracloudRightsRepo rightsRepo;
+    private IdUtil idUtil;
 
     private static final int USER_ID = 5;
 
@@ -68,17 +70,18 @@ public class LdapImplTest {
 
         repoMgr = EasyMock.createMock("DuracloudRepoMgr",
                                       DuracloudRepoMgr.class);
+        idUtil = EasyMock.createMock("IdUtil", IdUtil.class);
         ldap = new LdapImpl(repoMgr);
 
     }
 
     @After
     public void tearDown() throws Exception {
-        EasyMock.verify(repoMgr, userRepo, groupRepo, rightsRepo);
+        EasyMock.verify(repoMgr, userRepo, groupRepo, rightsRepo, idUtil);
     }
 
     private void replayMocks() {
-        EasyMock.replay(repoMgr, userRepo, groupRepo, rightsRepo);
+        EasyMock.replay(repoMgr, userRepo, groupRepo, rightsRepo, idUtil);
     }
 
     @Test
@@ -380,5 +383,65 @@ public class LdapImplTest {
                                  none,
                                  none,
                                  none);
+    }
+
+    @Test
+    public void testGetAccountIdError() throws Exception {
+        replayMocks();
+
+        boolean thrown = false;
+        try {
+            ldap.getAccountId("junk");
+            Assert.fail("exception expected");
+        } catch (DBNotFoundException e) {
+            thrown = true;
+        }
+        Assert.assertTrue(thrown);
+    }
+
+    @Test
+    public void testGetAccountId() throws Exception {
+        replayMocks();
+
+        doGetAccountId("ncsu", 2);
+        doGetAccountId("uva", 3);
+        doGetAccountId("umich", 4);
+    }
+
+    private void doGetAccountId(String institution,
+                                int expectedId) throws DBNotFoundException {
+        int id = ldap.getAccountId(institution);
+        Assert.assertEquals(institution, expectedId, id);
+    }
+
+    @Test
+    public void testSaveSecurityUser() {
+        int userId = 1;
+        int rightsId = 3;
+        createSaveSecurityUserMocks(userId, rightsId);
+        replayMocks();
+
+        SecurityUserBean user = createSecurityUser();
+        int acctId = 5;
+        ldap.saveSecurityUser(user, acctId);
+    }
+
+    private void createSaveSecurityUserMocks(int userId, int rightsId) {
+        EasyMock.expect(repoMgr.getIdUtil()).andReturn(idUtil).times(2);
+        EasyMock.expect(idUtil.newUserId()).andReturn(userId);
+
+        EasyMock.expect(repoMgr.getUserRepo()).andReturn(userRepo);
+        userRepo.save(EasyMock.isA(DuracloudUser.class));
+
+        EasyMock.expect(idUtil.newRightsId()).andReturn(rightsId);
+
+        EasyMock.expect(repoMgr.getRightsRepo()).andReturn(rightsRepo);
+        rightsRepo.save(EasyMock.isA(AccountRights.class));
+    }
+
+    private SecurityUserBean createSecurityUser() {
+        List<String> grants = new ArrayList<>();
+        grants.add(Role.ROLE_USER.name());
+        return new SecurityUserBean("user-name", "pass-word", grants);
     }
 }

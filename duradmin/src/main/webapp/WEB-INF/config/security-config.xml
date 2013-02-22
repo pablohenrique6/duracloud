@@ -16,11 +16,11 @@
 
       <!--Admin/Root endpoints-->
       <filter-chain pattern="/dashboard"
-                    filters="httpSessionContextIntegrationFilter,logoutFilter,requestHeaderAuthenticationFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
+                    filters="httpSessionContextIntegrationFilter,logoutFilter,requestHeaderAuthenticationFilter,autoUserProvisionFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
       <filter-chain pattern="/admin"
-                    filters="httpSessionContextIntegrationFilter,logoutFilter,requestHeaderAuthenticationFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
+                    filters="httpSessionContextIntegrationFilter,logoutFilter,requestHeaderAuthenticationFilter,autoUserProvisionFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
       <filter-chain pattern="/services**"
-                    filters="httpSessionContextIntegrationFilter,logoutFilter,requestHeaderAuthenticationFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
+                    filters="httpSessionContextIntegrationFilter,logoutFilter,requestHeaderAuthenticationFilter,autoUserProvisionFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
 
       <!--Open endpoints-->
       <filter-chain pattern="/login*"
@@ -40,7 +40,7 @@
 
       <!--Catch-all-->
       <filter-chain pattern="/**"
-                    filters="httpSessionContextIntegrationFilter,logoutFilter,requestHeaderAuthenticationFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
+                    filters="httpSessionContextIntegrationFilter,logoutFilter,requestHeaderAuthenticationFilter,autoUserProvisionFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
     </filter-chain-map>
   </beans:bean>
 
@@ -72,6 +72,12 @@
               class="org.springframework.security.ui.preauth.header.RequestHeaderPreAuthenticatedProcessingFilter ">
     <beans:property name="principalRequestHeader" value="REMOTE_USER"/>
     <beans:property name="authenticationManager" ref="authenticationManager"/>
+  </beans:bean>
+
+  <!--Filter: auto-user-provision-->
+  <beans:bean id="autoUserProvisionFilter"
+              class="org.duracloud.duradmin.security.AutoUserProvisionSecurityFilter">
+    <beans:constructor-arg ref="ldapCache"/>
   </beans:bean>
 
   <!--Filter: basic-auth-->
@@ -176,7 +182,11 @@
   </beans:bean>
 
   <!--LDAP Setup-->
-  <beans:bean id="repoMgr" class="org.duracloud.ldap.impl.DuracloudRepoMgrImpl"/>
+  <beans:bean id="idUtil" class="org.duracloud.ldap.impl.IdUtilImpl"/>
+
+  <beans:bean id="repoMgr" class="org.duracloud.ldap.impl.DuracloudRepoMgrImpl">
+    <beans:constructor-arg ref="idUtil"/>
+  </beans:bean>
 
   <beans:bean id="ldap" class="org.duracloud.ldap.impl.LdapImpl">
     <beans:constructor-arg ref="repoMgr"/>

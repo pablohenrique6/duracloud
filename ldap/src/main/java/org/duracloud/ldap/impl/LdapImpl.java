@@ -12,6 +12,7 @@ import org.duracloud.ldap.DuracloudGroupRepo;
 import org.duracloud.ldap.DuracloudRepoMgr;
 import org.duracloud.ldap.DuracloudRightsRepo;
 import org.duracloud.ldap.DuracloudUserRepo;
+import org.duracloud.ldap.IdUtil;
 import org.duracloud.ldap.Ldap;
 import org.duracloud.ldap.domain.AccountRights;
 import org.duracloud.ldap.domain.DuracloudGroup;
@@ -23,8 +24,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -34,6 +37,14 @@ import java.util.Set;
 public class LdapImpl implements Ldap {
 
     private final Logger log = LoggerFactory.getLogger(LdapImpl.class);
+
+    // FIXME: The institution -> account-id mapping should come from tables!
+    private static Map<String,Integer> institutionToAcctIds = new HashMap<>();
+    static         {
+        institutionToAcctIds.put("ncsu", 2);
+        institutionToAcctIds.put("uva", 3);
+        institutionToAcctIds.put("umich", 4);
+    }
 
     private DuracloudRepoMgr repoMgr;
 
@@ -161,6 +172,54 @@ public class LdapImpl implements Ldap {
         return userBeans;
     }
 
+    @Override
+    public int getAccountId(String institution) throws DBNotFoundException {
+        if (null == institution) {
+            throw new DBNotFoundException("Instituition arg is null!");
+        }
+
+        if (institutionToAcctIds.containsKey(institution.toLowerCase())) {
+            return institutionToAcctIds.get(institution.toLowerCase());
+        }
+        throw new DBNotFoundException("No account-id found for: " + institution);
+    }
+
+    @Override
+    public void saveSecurityUser(SecurityUserBean user, int acctId) {
+        if (null == user) {
+            throw new IllegalArgumentException("User arg is null!");
+        }
+
+        // Save user
+        int userId = getIdUtil().newUserId();
+        DuracloudUser dcUser = new DuracloudUser(userId,
+                                                 user.getUsername(),
+                                                 user.getPassword(),
+                                                 user.getUsername() + "-first",
+                                                 user.getUsername() + "-last",
+                                                 user.getEmail(),
+                                                 "What is my email?",
+                                                 user.getEmail());
+        userRepo().save(dcUser);
+
+        // Save rights
+        int rightsId = getIdUtil().newRightsId();
+        Set<Role> roles = new HashSet<>();
+
+        List<String> grants = user.getGrantedAuthorities();
+        if (null != grants && grants.size() > 0) {
+            for (String grant : grants) {
+                roles.add(Role.valueOf(grant));
+            }
+        }
+
+        AccountRights rights = new AccountRights(rightsId,
+                                                 acctId,
+                                                 userId,
+                                                 roles);
+        rightsRepo().save(rights);
+    }
+
     private DuracloudUser findUserById(int userId) {
         try {
             return userRepo().findById(userId);
@@ -179,5 +238,9 @@ public class LdapImpl implements Ldap {
 
     private DuracloudRightsRepo rightsRepo() {
         return repoMgr.getRightsRepo();
+    }
+
+    private IdUtil getIdUtil() {
+        return repoMgr.getIdUtil();
     }
 }
