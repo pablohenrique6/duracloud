@@ -26,4 +26,6 @@ public interface IdUtil {
 
     public int newRightsId();
 
+    public int newGroupId();
+
 }

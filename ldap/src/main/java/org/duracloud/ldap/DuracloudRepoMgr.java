@@ -7,6 +7,7 @@
  */
 package org.duracloud.ldap;
 
+import org.duracloud.ldap.domain.IdUtilConfig;
 import org.duracloud.ldap.domain.LdapConfig;
 
 /**
@@ -15,7 +16,7 @@ import org.duracloud.ldap.domain.LdapConfig;
  */
 public interface DuracloudRepoMgr {
 
-    public void initialize(LdapConfig config);
+    public void initialize(LdapConfig ldapConfig, IdUtilConfig idUtilConfig);
 
     public DuracloudUserRepo getUserRepo();
 

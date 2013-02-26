@@ -345,6 +345,7 @@ public class ApplicationInitializer extends BaseConfig {
             Application app = appWithConfig.getApplication();
             response = app.setSecurityConfig(new SecurityConfigBean(
                 securityConfig.getLdapConfig(),
+                securityConfig.getIdUtilConfig(),
                 securityConfig.getAcctIds()));
             validate(response, appWithConfig.getName());
         }

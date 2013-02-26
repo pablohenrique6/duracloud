@@ -44,8 +44,7 @@ public class SecurityRest extends BaseRest {
             content = restUtil.getRequestContent(request, headers);
             SecurityConfigBean config =
                 createSecurityConfigFrom(content.getContentStream());
-            userDetailsService.initialize(config.getLdapConfig(),
-                                          config.getAcctIds());
+            userDetailsService.initialize(config);
 
             String responseText = "Initialization Successful\n";
             return Response.ok(responseText, BaseRest.TEXT_PLAIN).build();

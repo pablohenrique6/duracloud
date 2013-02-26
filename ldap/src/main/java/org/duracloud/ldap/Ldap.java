@@ -8,6 +8,7 @@
 package org.duracloud.ldap;
 
 import org.duracloud.common.model.SecurityUserBean;
+import org.duracloud.ldap.domain.IdUtilConfig;
 import org.duracloud.ldap.domain.LdapConfig;
 import org.duracloud.ldap.error.DBNotFoundException;
 
@@ -23,9 +24,10 @@ public interface Ldap {
     /**
      * This method initiallizes the LDAP
      *
-     * @param config for LDAP connection
+     * @param ldapConfig   for LDAP connection
+     * @param idUtilConfig for IdUtil connection
      */
-    public void initialize(LdapConfig config);
+    public void initialize(LdapConfig ldapConfig, IdUtilConfig idUtilConfig);
 
     /**
      * This method returns the user with the arg username found within the arg

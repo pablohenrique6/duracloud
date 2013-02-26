@@ -16,11 +16,11 @@
 
       <!--Admin/Root endpoints-->
       <filter-chain pattern="/dashboard"
-                    filters="httpSessionContextIntegrationFilter,logoutFilter,requestHeaderAuthenticationFilter,autoUserProvisionFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
+                    filters="httpSessionContextIntegrationFilter,logoutFilter,autoUserProvisionFilter,requestHeaderAuthenticationFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
       <filter-chain pattern="/admin"
-                    filters="httpSessionContextIntegrationFilter,logoutFilter,requestHeaderAuthenticationFilter,autoUserProvisionFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
+                    filters="httpSessionContextIntegrationFilter,logoutFilter,autoUserProvisionFilter,requestHeaderAuthenticationFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
       <filter-chain pattern="/services**"
-                    filters="httpSessionContextIntegrationFilter,logoutFilter,requestHeaderAuthenticationFilter,autoUserProvisionFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
+                    filters="httpSessionContextIntegrationFilter,logoutFilter,autoUserProvisionFilter,requestHeaderAuthenticationFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
 
       <!--Open endpoints-->
       <filter-chain pattern="/login*"
@@ -40,7 +40,7 @@
 
       <!--Catch-all-->
       <filter-chain pattern="/**"
-                    filters="httpSessionContextIntegrationFilter,logoutFilter,requestHeaderAuthenticationFilter,autoUserProvisionFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
+                    filters="httpSessionContextIntegrationFilter,logoutFilter,autoUserProvisionFilter,requestHeaderAuthenticationFilter,basicProcessingFilter,exceptionTranslationFilter,filterSecurityInterceptor"/>
     </filter-chain-map>
   </beans:bean>
 

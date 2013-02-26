@@ -7,6 +7,7 @@
  */
 package org.duracloud.security.xml;
 
+import org.duracloud.ldap.domain.IdUtilConfig;
 import org.duracloud.ldap.domain.LdapConfig;
 import org.duracloud.security.domain.SecurityConfigBean;
 import org.junit.After;
@@ -33,6 +34,11 @@ public class SecurityUserElementReaderWriterTest {
     private final String userdn = "userdn-";
     private final String password = "password-";
     private final String url = "url-";
+
+    private final String host = "host-";
+    private final String port = "port-";
+    private final String ctxt = "ctxt-";
+
     private Set<Integer> acctIds;
 
     @After
@@ -58,12 +64,18 @@ public class SecurityUserElementReaderWriterTest {
         ldapConfig.setLdapPassword(password);
         ldapConfig.setLdapUrl(url);
 
+        IdUtilConfig idUtilConfig = new IdUtilConfig();
+        idUtilConfig.setHost(host);
+        idUtilConfig.setPort(port);
+        idUtilConfig.setContext(ctxt);
+
         acctIds = new HashSet<>();
         for (int i = 10; i < NUM_ACCTS; ++i) {
             acctIds.add(i);
         }
 
         config.setLdapConfig(ldapConfig);
+        config.setIdUtilConfig(idUtilConfig);
         config.setAcctIds(acctIds);
 
         return config;
@@ -85,9 +97,11 @@ public class SecurityUserElementReaderWriterTest {
         Assert.assertNotNull(config);
 
         LdapConfig ldapConfig = config.getLdapConfig();
+        IdUtilConfig idUtilConfig = config.getIdUtilConfig();
         Set<Integer> acctIdsSet = config.getAcctIds();
 
         Assert.assertNotNull(ldapConfig);
+        Assert.assertNotNull(idUtilConfig);
         Assert.assertNotNull(acctIdsSet);
 
         Assert.assertNotNull(ldapConfig.getLdapBaseDn());
@@ -99,6 +113,14 @@ public class SecurityUserElementReaderWriterTest {
         Assert.assertEquals(userdn, ldapConfig.getLdapUserDn());
         Assert.assertEquals(password, ldapConfig.getLdapPassword());
         Assert.assertEquals(url, ldapConfig.getLdapUrl());
+
+        Assert.assertNotNull(idUtilConfig.getHost());
+        Assert.assertNotNull(idUtilConfig.getPort());
+        Assert.assertNotNull(idUtilConfig.getContext());
+
+        Assert.assertEquals(host, idUtilConfig.getHost());
+        Assert.assertEquals(port, idUtilConfig.getPort());
+        Assert.assertEquals(ctxt, idUtilConfig.getContext());
 
         Assert.assertEquals(acctIds.size(), acctIdsSet.size());
         for (Integer acctId : acctIds) {

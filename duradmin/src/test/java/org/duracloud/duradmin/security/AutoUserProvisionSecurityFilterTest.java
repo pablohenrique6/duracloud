@@ -11,6 +11,7 @@ import junit.framework.Assert;
 import org.duracloud.common.error.DuraCloudCheckedException;
 import org.duracloud.common.model.SecurityUserBean;
 import org.duracloud.ldap.Ldap;
+import org.duracloud.ldap.domain.DuracloudGroup;
 import org.duracloud.ldap.domain.Role;
 import org.duracloud.ldap.error.DBNotFoundException;
 import org.easymock.EasyMock;
@@ -29,6 +30,7 @@ import static org.duracloud.duradmin.security.AutoUserProvisionSecurityFilter.DU
 import static org.duracloud.duradmin.security.AutoUserProvisionSecurityFilter.ENTITLEMENT;
 import static org.duracloud.duradmin.security.AutoUserProvisionSecurityFilter.EPPN;
 import static org.duracloud.duradmin.security.AutoUserProvisionSecurityFilter.MAIL;
+import static org.duracloud.ldap.domain.DuracloudGroup.PREFIX;
 
 /**
  * @author Andrew Woods
@@ -164,11 +166,10 @@ public class AutoUserProvisionSecurityFilterTest {
         Assert.assertEquals(eppn, user.getUsername());
         Assert.assertEquals(mail, user.getEmail());
 
-        Assert.assertTrue(user.getPassword().length() > 10);
-        Assert.assertTrue(user.getPassword().length() < 15);
+        Assert.assertEquals(96, user.getPassword().length());
 
         Assert.assertEquals(1, user.getGroups().size());
-        Assert.assertEquals(institution, user.getGroups().get(0));
+        Assert.assertEquals(PREFIX + institution, user.getGroups().get(0));
 
         Assert.assertEquals(2, user.getGrantedAuthorities().size());
         Assert.assertTrue(user.getGrantedAuthorities()

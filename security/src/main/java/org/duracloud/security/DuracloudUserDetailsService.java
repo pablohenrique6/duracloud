@@ -8,6 +8,7 @@
 package org.duracloud.security;
 
 import org.duracloud.ldap.domain.LdapConfig;
+import org.duracloud.security.domain.SecurityConfigBean;
 import org.springframework.security.userdetails.UserDetailsService;
 import org.duracloud.common.model.SecurityUserBean;
 
@@ -20,7 +21,7 @@ import java.util.Set;
  */
 public interface DuracloudUserDetailsService extends UserDetailsService {
 
-    public void initialize(LdapConfig ldapConfig, Set<Integer> accountIds);
+    public void initialize(SecurityConfigBean securityConfig);
 
     @Deprecated
     public void setUsers(List<SecurityUserBean> users);

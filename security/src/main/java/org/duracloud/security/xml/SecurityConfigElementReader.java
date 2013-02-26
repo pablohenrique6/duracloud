@@ -7,10 +7,12 @@
  */
 package org.duracloud.security.xml;
 
+import org.duracloud.IdUtilType;
 import org.duracloud.LdapType;
 import org.duracloud.SecurityConfigDocument;
 import org.duracloud.SecurityConfigType;
 import org.duracloud.common.error.DuraCloudRuntimeException;
+import org.duracloud.ldap.domain.IdUtilConfig;
 import org.duracloud.ldap.domain.LdapConfig;
 import org.duracloud.security.domain.SecurityConfigBean;
 
@@ -36,6 +38,7 @@ public class SecurityConfigElementReader {
     public static SecurityConfigBean createSecurityConfigFrom(
         SecurityConfigDocument doc) {
         LdapConfig ldapConfig = null;
+        IdUtilConfig idUtilConfig = null;
         Set<Integer> acctIds = null;
 
         SecurityConfigType configType = doc.getSecurityConfig();
@@ -47,6 +50,11 @@ public class SecurityConfigElementReader {
                 ldapConfig = createLdapConfig(ldapType);
             }
 
+            IdUtilType idUtilType = configType.getIdUtil();
+            if (null != ldapType) {
+                idUtilConfig = createIdUtilConfig(idUtilType);
+            }
+
             List<Integer> acctIdsList = configType.getAcctIds();
             if (null != acctIdsList) {
                 acctIds = new HashSet<>();
@@ -55,7 +63,7 @@ public class SecurityConfigElementReader {
         }
 
         if (null != ldapConfig && null != acctIds) {
-            return new SecurityConfigBean(ldapConfig, acctIds);
+            return new SecurityConfigBean(ldapConfig, idUtilConfig, acctIds);
 
         } else {
             StringBuilder err = new StringBuilder();
@@ -78,6 +86,16 @@ public class SecurityConfigElementReader {
         ldapConfig.setLdapUrl(ldapType.getUrl());
 
         return ldapConfig;
+    }
+
+    private static IdUtilConfig createIdUtilConfig(IdUtilType idUtilType) {
+        IdUtilConfig idUtilConfig = new IdUtilConfig();
+
+        idUtilConfig.setHost(idUtilType.getHost());
+        idUtilConfig.setPort(idUtilType.getPort());
+        idUtilConfig.setContext(idUtilType.getContext());
+
+        return idUtilConfig;
     }
 
     private static void checkSchemaVersion(String schemaVersion) {

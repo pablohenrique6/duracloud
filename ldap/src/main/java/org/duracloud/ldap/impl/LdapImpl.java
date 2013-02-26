@@ -17,6 +17,7 @@ import org.duracloud.ldap.Ldap;
 import org.duracloud.ldap.domain.AccountRights;
 import org.duracloud.ldap.domain.DuracloudGroup;
 import org.duracloud.ldap.domain.DuracloudUser;
+import org.duracloud.ldap.domain.IdUtilConfig;
 import org.duracloud.ldap.domain.LdapConfig;
 import org.duracloud.ldap.domain.Role;
 import org.duracloud.ldap.error.DBNotFoundException;
@@ -53,8 +54,8 @@ public class LdapImpl implements Ldap {
     }
 
     @Override
-    public void initialize(LdapConfig config) {
-        repoMgr.initialize(config);
+    public void initialize(LdapConfig ldapConfig, IdUtilConfig idUtilConfig) {
+        repoMgr.initialize(ldapConfig, idUtilConfig);
     }
 
     @Override
@@ -218,6 +219,30 @@ public class LdapImpl implements Ldap {
                                                  userId,
                                                  roles);
         rightsRepo().save(rights);
+
+        // Save groups
+        List<String> groups = user.getGroups();
+        if (null != groups && groups.size() > 0) {
+            DuracloudGroup group = null;
+            for (String grp : groups) {
+                try {
+                    group = groupRepo().findInAccountByGroupname(grp, acctId);
+                    group.addUserId(userId);
+
+                } catch (DBNotFoundException e) {
+                    // Group not found, create group
+                    log.info("Creating group: {}, for user: {}", grp, userId);
+                    int grpId = getIdUtil().newGroupId();
+                    Set<Integer> userIds = new HashSet<>();
+                    userIds.add(userId);
+                    group = new DuracloudGroup(grpId, grp, acctId, userIds);
+                }
+            }
+
+            if (null != group) {
+                groupRepo().save(group);
+            }
+        }
     }
 
     private DuracloudUser findUserById(int userId) {

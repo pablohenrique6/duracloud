@@ -11,9 +11,9 @@ import org.duracloud.common.error.InvalidUsernameException;
 import org.duracloud.common.model.Credential;
 import org.duracloud.common.model.RootUserCredential;
 import org.duracloud.common.model.SystemUserCredential;
-import org.duracloud.ldap.domain.LdapConfig;
 import org.duracloud.security.DuracloudUserDetailsService;
 import org.duracloud.common.model.SecurityUserBean;
+import org.duracloud.security.domain.SecurityConfigBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * This class acts as the repository of username/password/role info for access
@@ -72,7 +71,7 @@ public class UserDetailsServiceImpl implements DuracloudUserDetailsService {
         addUser(root);
     }
 
-    public void initialize(LdapConfig ldapConfig, Set<Integer> accountIds) {
+    public void initialize(SecurityConfigBean securityConfig) {
         throw new UnsupportedOperationException(
             "UserDetailsServiceImpl.initialize() not supported!");
     }

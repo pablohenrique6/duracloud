@@ -9,6 +9,7 @@ package org.duracloud.ldap.impl;
 
 import org.duracloud.common.model.SecurityUserBean;
 import org.duracloud.ldap.Ldap;
+import org.duracloud.ldap.domain.IdUtilConfig;
 import org.duracloud.ldap.domain.LdapConfig;
 import org.duracloud.ldap.error.DBNotFoundException;
 import org.slf4j.Logger;
@@ -54,10 +55,10 @@ public class LdapCachingImpl implements Ldap {
     }
 
     @Override
-    public void initialize(LdapConfig config) {
+    public void initialize(LdapConfig ldapConfig, IdUtilConfig idUtilConfig) {
         lastRefresh = 0;
         refreshCache();
-        target.initialize(config);
+        target.initialize(ldapConfig, idUtilConfig);
     }
 
     private void refreshCache() {

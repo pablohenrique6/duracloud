@@ -9,6 +9,7 @@ package org.duracloud.appconfig.domain;
 
 import org.apache.commons.lang.StringUtils;
 import org.duracloud.common.error.DuraCloudRuntimeException;
+import org.duracloud.ldap.domain.IdUtilConfig;
 import org.duracloud.ldap.domain.LdapConfig;
 import org.duracloud.security.domain.SecurityConfigBean;
 import org.duracloud.security.xml.SecurityDocumentBinding;
@@ -38,13 +39,20 @@ public class SecurityConfig extends BaseConfig implements AppConfig {
     protected final static String ldapPasswordKey = "password";
     protected final static String ldapUrlKey = "url";
 
+    protected final static String idUtilKey = "idutil";
+    protected final static String idUtilHostKey = "host";
+    protected final static String idUtilPortKey = "port";
+    protected final static String idUtilCtxtKey = "ctxt";
+
     private LdapConfig ldapConfig = new LdapConfig();
+    private IdUtilConfig idUtilConfig = new IdUtilConfig();
     private Set<Integer> acctIds = new HashSet<>();
 
 
     public String asXml() {
         return SecurityDocumentBinding.createDocumentFrom(new SecurityConfigBean(
             ldapConfig,
+            idUtilConfig,
             acctIds));
     }
 
@@ -59,12 +67,14 @@ public class SecurityConfig extends BaseConfig implements AppConfig {
     protected void loadProperty(String key, String value) {
         key = key.toLowerCase();
         String prefix = getPrefix(key);
+        String suffix = getSuffix(key);
         if (prefix.equalsIgnoreCase(ldapKey)) {
-            String suffix = getSuffix(key);
             loadLdap(suffix, value);
 
+        } else if (prefix.equalsIgnoreCase(idUtilKey)) {
+            loadIdUtil(suffix, value);
+
         } else if (prefix.equalsIgnoreCase(acctIdKey)) {
-            String suffix = getSuffix(key);
             loadAccts(suffix, value);
 
         } else {
@@ -86,6 +96,23 @@ public class SecurityConfig extends BaseConfig implements AppConfig {
 
         } else if (key.equalsIgnoreCase(ldapUrlKey)) {
             ldapConfig.setLdapUrl(value);
+
+        } else {
+            String msg = "unknown user key: " + key + " (" + value + ")";
+            log.error(msg);
+            throw new DuraCloudRuntimeException(msg);
+        }
+    }
+
+    private void loadIdUtil(String key, String value) {
+        if (key.equalsIgnoreCase(idUtilHostKey)) {
+            idUtilConfig.setHost(value);
+
+        } else if (key.equalsIgnoreCase(idUtilPortKey)) {
+            idUtilConfig.setPort(value);
+
+        } else if (key.equalsIgnoreCase(idUtilCtxtKey)) {
+            idUtilConfig.setContext(value);
 
         } else {
             String msg = "unknown user key: " + key + " (" + value + ")";
@@ -118,6 +145,10 @@ public class SecurityConfig extends BaseConfig implements AppConfig {
 
     public LdapConfig getLdapConfig() {
         return ldapConfig;
+    }
+
+    public IdUtilConfig getIdUtilConfig() {
+        return idUtilConfig;
     }
 
     public Set<Integer> getAcctIds() {

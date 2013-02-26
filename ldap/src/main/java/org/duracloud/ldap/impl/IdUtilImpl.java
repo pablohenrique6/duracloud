@@ -41,6 +41,10 @@ public class IdUtilImpl implements IdUtil {
                               String port,
                               String context,
                               RestHttpHelper restHelper) {
+        if (null == host || null == port || null == context) {
+            throw new IllegalArgumentException("Args must not be null!");
+        }
+
         this.host = host;
         this.port = port;
         this.context = context;
@@ -65,6 +69,11 @@ public class IdUtilImpl implements IdUtil {
     @Override
     public int newRightsId() {
         return doGetId("rights");
+    }
+
+    @Override
+    public int newGroupId() {
+        return doGetId("group");
     }
 
     private int doGetId(String resource) {

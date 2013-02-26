@@ -10,6 +10,7 @@ package org.duracloud.ldap.impl;
 import junit.framework.Assert;
 import org.duracloud.common.model.SecurityUserBean;
 import org.duracloud.ldap.Ldap;
+import org.duracloud.ldap.domain.IdUtilConfig;
 import org.duracloud.ldap.domain.LdapConfig;
 import org.duracloud.ldap.error.DBNotFoundException;
 import org.easymock.EasyMock;
@@ -51,13 +52,14 @@ public class LdapCachingImplTest {
 
     @Test
     public void testInitialize() throws Exception {
-        LdapConfig config = new LdapConfig();
-        target.initialize(config);
+        LdapConfig ldapConfig = new LdapConfig();
+        IdUtilConfig idUtilConfig = new IdUtilConfig();
+        target.initialize(ldapConfig, idUtilConfig);
         EasyMock.expectLastCall();
         replayMocks();
 
         // Perform test.
-        cache.initialize(config);
+        cache.initialize(ldapConfig, idUtilConfig);
     }
 
     @Test

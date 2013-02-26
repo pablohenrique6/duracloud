@@ -7,6 +7,7 @@
   <xs:complexType name="SecurityConfigType">
     <xs:sequence>
       <xs:element name="ldap" type="LdapType"/>
+      <xs:element name="idUtil" type="IdUtilType"/>
       <xs:element name="acctIds" type="AcctIdsType"/>
     </xs:sequence>
     <xs:attribute name="schemaVersion" type="xs:string" fixed="2.3" use="required"/>
@@ -18,6 +19,14 @@
       <xs:element name="userdn" type="xs:string"/>
       <xs:element name="password" type="xs:string"/>
       <xs:element name="url" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="IdUtilType">
+    <xs:sequence>
+      <xs:element name="host" type="xs:string"/>
+      <xs:element name="port" type="xs:string"/>
+      <xs:element name="context" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
   

@@ -10,7 +10,9 @@ package org.duracloud.duradmin.security;
 import org.apache.commons.lang.StringUtils;
 import org.duracloud.common.error.DuraCloudCheckedException;
 import org.duracloud.common.model.SecurityUserBean;
+import org.duracloud.common.util.ChecksumUtil;
 import org.duracloud.ldap.Ldap;
+import org.duracloud.ldap.domain.DuracloudGroup;
 import org.duracloud.ldap.domain.Role;
 import org.duracloud.ldap.error.DBNotFoundException;
 import org.slf4j.Logger;
@@ -152,10 +154,14 @@ public class AutoUserProvisionSecurityFilter extends SpringSecurityFilter {
         }
 
         List<String> groups = new ArrayList<String>();
-        groups.add(institution);
+        groups.add(DuracloudGroup.PREFIX + institution);
 
+        // Generate password
+        ChecksumUtil util = new ChecksumUtil(ChecksumUtil.Algorithm.SHA_384);
+        String random = Long.toString(Math.abs(new Random().nextLong()), 36);
+
+        String password = util.generateChecksum(random);
         String username = eppn;
-        String password = Long.toString(Math.abs(new Random().nextLong()), 36);
         boolean enabled = true;
 
         return new SecurityUserBean(username,
@@ -170,13 +176,15 @@ public class AutoUserProvisionSecurityFilter extends SpringSecurityFilter {
     }
 
     private boolean isDuraCloudEntitlement(String entitlement) {
-        return entitlement.equalsIgnoreCase(DURACLOUD_USER_SHORT) ||
-                entitlement.equalsIgnoreCase(DURACLOUD_USER_URI);
+        return entitlement.toLowerCase()
+                .contains(DURACLOUD_USER_SHORT.toLowerCase())
+                || entitlement.toLowerCase()
+                .contains(DURACLOUD_USER_URI.toLowerCase());
     }
 
     @Override
     public int getOrder() {
-        // Immediately follow pre-auth-filter
-        return FilterChainOrder.PRE_AUTH_FILTER + 1;
+        // Immediately before pre-auth-filter
+        return FilterChainOrder.PRE_AUTH_FILTER - 1;
     }
 }

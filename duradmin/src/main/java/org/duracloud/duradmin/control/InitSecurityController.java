@@ -55,8 +55,7 @@ public class InitSecurityController extends AbstractController {
         if (xml != null) {
             try {
                 SecurityConfigBean config = createSecurityConfigFrom(xml);
-                userDetailsService.initialize(config.getLdapConfig(),
-                                              config.getAcctIds());
+                userDetailsService.initialize(config);
                 return respond(response, "Initialization Successful\n", SC_OK);
 
             } catch (Exception e) {

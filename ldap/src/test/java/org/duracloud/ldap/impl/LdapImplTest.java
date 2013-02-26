@@ -415,20 +415,27 @@ public class LdapImplTest {
     }
 
     @Test
-    public void testSaveSecurityUser() {
+    public void testSaveSecurityUser() throws Exception {
         int userId = 1;
         int rightsId = 3;
-        createSaveSecurityUserMocks(userId, rightsId);
+        int acctId = 5;
+        int groupId = 7;
+        String group = DuracloudGroup.PREFIX + "university";
+        createSaveSecurityUserMocks(userId, rightsId, groupId, acctId, group);
         replayMocks();
 
-        SecurityUserBean user = createSecurityUser();
-        int acctId = 5;
+        SecurityUserBean user = createSecurityUser(group);
         ldap.saveSecurityUser(user, acctId);
     }
 
-    private void createSaveSecurityUserMocks(int userId, int rightsId) {
-        EasyMock.expect(repoMgr.getIdUtil()).andReturn(idUtil).times(2);
+    private void createSaveSecurityUserMocks(int userId,
+                                             int rightsId,
+                                             int groupId,
+                                             int acctId,
+                                             String group) throws Exception {
+        EasyMock.expect(repoMgr.getIdUtil()).andReturn(idUtil).times(3);
         EasyMock.expect(idUtil.newUserId()).andReturn(userId);
+        EasyMock.expect(idUtil.newGroupId()).andReturn(groupId);
 
         EasyMock.expect(repoMgr.getUserRepo()).andReturn(userRepo);
         userRepo.save(EasyMock.isA(DuracloudUser.class));
@@ -437,11 +444,38 @@ public class LdapImplTest {
 
         EasyMock.expect(repoMgr.getRightsRepo()).andReturn(rightsRepo);
         rightsRepo.save(EasyMock.isA(AccountRights.class));
+
+        EasyMock.expect(repoMgr.getGroupRepo()).andReturn(groupRepo).times(2);
+
+        Set<Integer> userIds = new HashSet<>();
+        userIds.add(userId);
+        DuracloudGroup dcGroup = new DuracloudGroup(groupId,
+                                                    group,
+                                                    acctId,
+                                                    userIds);
+        EasyMock.expect(groupRepo.findInAccountByGroupname(group, acctId))
+                .andThrow(new DBNotFoundException("canned-exception"));
+
+        groupRepo.save(dcGroup);
+        EasyMock.expectLastCall();
     }
 
-    private SecurityUserBean createSecurityUser() {
+    private SecurityUserBean createSecurityUser(String group) {
         List<String> grants = new ArrayList<>();
         grants.add(Role.ROLE_USER.name());
-        return new SecurityUserBean("user-name", "pass-word", grants);
+
+        List<String> groups = new ArrayList<>();
+        groups.add(group);
+
+        return new SecurityUserBean("user-name",
+                                    "pass-word",
+                                    "e-mail",
+                                    true,
+                                    true,
+                                    true,
+                                    true,
+                                    grants,
+                                    groups);
     }
+
 }

@@ -7,8 +7,10 @@
  */
 package org.duracloud.security.xml;
 
+import org.duracloud.IdUtilType;
 import org.duracloud.LdapType;
 import org.duracloud.SecurityConfigType;
+import org.duracloud.ldap.domain.IdUtilConfig;
 import org.duracloud.ldap.domain.LdapConfig;
 import org.duracloud.security.domain.SecurityConfigBean;
 
@@ -47,6 +49,9 @@ public class SecurityConfigElementWriter {
         LdapType ldapType = configType.addNewLdap();
         populateLdapType(ldapType, config.getLdapConfig());
 
+        IdUtilType idUtilType = configType.addNewIdUtil();
+        populateIdUtilType(idUtilType, config.getIdUtilConfig());
+
         List<Integer> acctIdsList = new ArrayList<>();
         acctIdsList.addAll(config.getAcctIds());
         configType.setAcctIds(acctIdsList);
@@ -57,6 +62,12 @@ public class SecurityConfigElementWriter {
         ldapType.setUserdn(config.getLdapUserDn());
         ldapType.setPassword(config.getLdapPassword());
         ldapType.setUrl(config.getLdapUrl());
+    }
+
+    private static void populateIdUtilType(IdUtilType idUtilType, IdUtilConfig config) {
+        idUtilType.setHost(config.getHost());
+        idUtilType.setPort(config.getPort());
+        idUtilType.setContext(config.getContext());
     }
 
 }

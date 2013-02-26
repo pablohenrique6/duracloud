@@ -11,10 +11,12 @@ import org.duracloud.common.model.Credential;
 import org.duracloud.common.model.RootUserCredential;
 import org.duracloud.common.model.SystemUserCredential;
 import org.duracloud.ldap.Ldap;
+import org.duracloud.ldap.domain.IdUtilConfig;
 import org.duracloud.ldap.domain.LdapConfig;
 import org.duracloud.ldap.error.DBNotFoundException;
 import org.duracloud.security.DuracloudUserDetailsService;
 import org.duracloud.common.model.SecurityUserBean;
+import org.duracloud.security.domain.SecurityConfigBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -76,16 +78,27 @@ public class UserDetailsServiceLdapImpl implements DuracloudUserDetailsService {
                                                    grants));
     }
 
-    public void initialize(LdapConfig ldapConfig, Set<Integer> accountIds) {
+    public void initialize(SecurityConfigBean securityConfig) {
+        if (null == securityConfig) {
+            throw new IllegalArgumentException("SecurityConfig is null!");
+        }
+
+        Set<Integer> acctIds = securityConfig.getAcctIds();
+        LdapConfig ldapConfig = securityConfig.getLdapConfig();
+        IdUtilConfig idUtilConfig = securityConfig.getIdUtilConfig();
+
         if (null == ldapConfig) {
             throw new IllegalArgumentException("LdapConfig is null!");
         }
-        if (null == accountIds || accountIds.size() == 0) {
+        if (null == idUtilConfig) {
+            throw new IllegalArgumentException("IdUtilConfig is null!");
+        }
+        if (null == acctIds || acctIds.size() == 0) {
             throw new IllegalArgumentException("AccountIds is null or empty!");
         }
 
-        this.ldap.initialize(ldapConfig);
-        this.acctIds = accountIds;
+        this.ldap.initialize(ldapConfig, idUtilConfig);
+        this.acctIds = acctIds;
     }
 
     /**

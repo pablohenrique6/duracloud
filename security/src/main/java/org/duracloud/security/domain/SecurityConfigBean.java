@@ -7,6 +7,7 @@
  */
 package org.duracloud.security.domain;
 
+import org.duracloud.ldap.domain.IdUtilConfig;
 import org.duracloud.ldap.domain.LdapConfig;
 
 import java.util.Set;
@@ -18,6 +19,7 @@ import java.util.Set;
 public class SecurityConfigBean {
 
     private LdapConfig ldapConfig;
+    private IdUtilConfig idUtilConfig;
     private Set<Integer> acctIds;
 
     public static final String SCHEMA_VERSION = "2.3";
@@ -26,8 +28,11 @@ public class SecurityConfigBean {
         // default constructor
     }
 
-    public SecurityConfigBean(LdapConfig ldapConfig, Set<Integer> acctIds) {
+    public SecurityConfigBean(LdapConfig ldapConfig,
+                              IdUtilConfig idUtilConfig,
+                              Set<Integer> acctIds) {
         this.ldapConfig = ldapConfig;
+        this.idUtilConfig = idUtilConfig;
         this.acctIds = acctIds;
     }
 
@@ -37,6 +42,14 @@ public class SecurityConfigBean {
 
     public void setLdapConfig(LdapConfig ldapConfig) {
         this.ldapConfig = ldapConfig;
+    }
+
+    public IdUtilConfig getIdUtilConfig() {
+        return idUtilConfig;
+    }
+
+    public void setIdUtilConfig(IdUtilConfig idUtilConfig) {
+        this.idUtilConfig = idUtilConfig;
     }
 
     public Set<Integer> getAcctIds() {
