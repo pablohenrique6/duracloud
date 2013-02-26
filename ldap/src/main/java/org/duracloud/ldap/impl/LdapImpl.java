@@ -43,7 +43,7 @@ public class LdapImpl implements Ldap {
     private static Map<String,Integer> institutionToAcctIds = new HashMap<>();
     static         {
         institutionToAcctIds.put("ncsu", 2);
-        institutionToAcctIds.put("uva", 3);
+        institutionToAcctIds.put("virginia", 3);
         institutionToAcctIds.put("umich", 4);
     }
 

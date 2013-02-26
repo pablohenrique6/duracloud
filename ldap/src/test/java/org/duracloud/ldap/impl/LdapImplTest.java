@@ -404,7 +404,7 @@ public class LdapImplTest {
         replayMocks();
 
         doGetAccountId("ncsu", 2);
-        doGetAccountId("uva", 3);
+        doGetAccountId("Virginia", 3);
         doGetAccountId("umich", 4);
     }
 

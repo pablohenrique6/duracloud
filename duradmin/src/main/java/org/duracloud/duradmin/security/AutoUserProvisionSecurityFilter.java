@@ -137,11 +137,11 @@ public class AutoUserProvisionSecurityFilter extends SpringSecurityFilter {
         }
 
         int end = eppn.length();
-        if (eppn.endsWith(".edu")) {
+        if (eppn.toLowerCase().endsWith(".edu")) {
             end = eppn.length() - ".edu".length();
         }
 
-        return eppn.substring(start + 1, end);
+        return eppn.toLowerCase().substring(start + 1, end);
     }
 
     // Protected for unit testing
