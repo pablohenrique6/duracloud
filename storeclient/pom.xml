@@ -4,13 +4,13 @@
   <groupId>org.duracloud</groupId>
   <artifactId>storeclient</artifactId>
   <packaging>bundle</packaging>
-  <version>2.3.0-SNAPSHOT</version>
+  <version>3.0.0-SNAPSHOT</version>
   <name>StoreClient</name>
 
   <parent>
     <artifactId>duracloud</artifactId>
     <groupId>org.duracloud</groupId>
-    <version>2.3.0-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
@@ -113,6 +113,10 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>com.springsource.org.apache.commons.io</artifactId>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.thoughtworks.xstream</groupId>
+      <artifactId>com.springsource.com.thoughtworks.xstream</artifactId>
     </dependency>
     
     <!-- test -->

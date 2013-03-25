@@ -1837,6 +1837,12 @@ $(function(){
                 cb.makeVisible();
             }
 
+            var synctool = $(".get-synctool-button", this.element);
+            synctool.unbind("click").click(function() {
+                window.location = "http://docs.duraspace.org/duracloud/${project.version}/downloads/duracloud-sync-${project.version}.jar?attachment=true";
+                window.open("https://wiki.duraspace.org/display/DURACLOUDDOC/DuraCloud+Sync+Tool", "_blank");
+            });
+
         },
     }));
 
@@ -2770,6 +2776,8 @@ $(function(){
                 
                 
             }
+
+            this._loadHistoryPanel(space);
         },
 
         _loadHistoryPanel: function(options){

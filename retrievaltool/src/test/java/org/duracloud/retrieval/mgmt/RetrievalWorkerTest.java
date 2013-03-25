@@ -8,9 +8,10 @@
 package org.duracloud.retrieval.mgmt;
 
 import org.apache.commons.io.FileUtils;
-import org.duracloud.common.util.ChecksumUtil;
-import org.duracloud.retrieval.RetrievalTestBase;
 import org.duracloud.common.model.ContentItem;
+import org.duracloud.common.util.ChecksumUtil;
+import org.duracloud.common.util.DateUtil;
+import org.duracloud.retrieval.RetrievalTestBase;
 import org.duracloud.retrieval.source.ContentStream;
 import org.duracloud.retrieval.source.RetrievalSource;
 import org.junit.Test;
@@ -19,6 +20,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -35,6 +38,7 @@ public class RetrievalWorkerTest extends RetrievalTestBase {
     private final String spaceId = "space-id";
     private final String contentId = "path/to/content-id";
     private String contentValue = "content-value";
+    private long testTime = 946684800000L; // Jan 1, 2000 00:00:00 GMT
 
     @Test
     public void testRetrieveFile() throws Exception {
@@ -164,6 +168,15 @@ public class RetrievalWorkerTest extends RetrievalTestBase {
 
         worker.retrieveToFile(localFile);
         assertTrue(localFile.exists());
+
+        // Test timestamps
+        BasicFileAttributes fileAttributes =
+            Files.readAttributes(localFile.toPath(), BasicFileAttributes.class);
+        assertEquals(testTime, fileAttributes.creationTime().toMillis());
+        assertEquals(testTime, fileAttributes.lastAccessTime().toMillis());
+        assertEquals(testTime, fileAttributes.lastModifiedTime().toMillis());
+
+        // Test file value
         String fileValue = FileUtils.readFileToString(localFile);
         assertEquals(fileValue, contentValue);
 
@@ -180,12 +193,56 @@ public class RetrievalWorkerTest extends RetrievalTestBase {
         }
     }
 
+    @Test
+    public void testApplyTimestamps() throws Exception {
+        String time1 = DateUtil.convertToStringLong(testTime + 100000);
+        String time2 = DateUtil.convertToStringLong(testTime + 200000);
+        String time3 = DateUtil.convertToStringLong(testTime + 300000);
+        ContentStream content =
+            new ContentStream(null, null, time1, time2, time3);
+
+        File localFile = new File(tempDir, "timestamp-test");
+        FileUtils.writeStringToFile(localFile, contentValue);
+
+        // Check that initial timestamps are current
+        BasicFileAttributes fileAttributes =
+            Files.readAttributes(localFile.toPath(), BasicFileAttributes.class);
+        long now = System.currentTimeMillis();
+        assertTrue(isTimeClose(fileAttributes.creationTime().toMillis(), now));
+        assertTrue(isTimeClose(fileAttributes.lastAccessTime().toMillis(),now));
+        assertTrue(isTimeClose(fileAttributes.lastModifiedTime().toMillis(), now));
+
+        RetrievalWorker worker = createRetrievalWorker(true);
+        worker.applyTimestamps(content, localFile);
+
+        // Verify that timestamps were set
+        fileAttributes =
+            Files.readAttributes(localFile.toPath(), BasicFileAttributes.class);
+        long creationTime = fileAttributes.creationTime().toMillis();
+        long lastAccessTime = fileAttributes.lastAccessTime().toMillis();
+        long lastModifiedTime = fileAttributes.lastModifiedTime().toMillis();
+
+        assertFalse(isTimeClose(creationTime, now));
+        assertFalse(isTimeClose(lastAccessTime, now));
+        assertFalse(isTimeClose(lastModifiedTime, now));
+        assertTrue(testTime + 100000 == creationTime || // windows
+                   testTime + 300000 == creationTime);  // linux
+        assertEquals(testTime + 200000, lastAccessTime);
+        assertEquals(testTime + 300000, lastModifiedTime);
+    }
+
+    // Determines if two time values (in millis) are within 10 minutes of each other
+    private boolean isTimeClose(long time1, long time2) {
+        return Math.abs(time1 - time2) < 600000;
+    }
+
     private RetrievalWorker createRetrievalWorker(boolean overwrite) {
         return new RetrievalWorker(new ContentItem(spaceId, contentId),
                                    new MockRetrievalSource(),
                                    tempDir,
                                    overwrite,
                                    createMockOutputWriter(),
+                                   true,
                                    true);
     }
 
@@ -195,6 +252,7 @@ public class RetrievalWorkerTest extends RetrievalTestBase {
                                    tempDir,
                                    overwrite,
                                    createMockOutputWriter(),
+                                   false,
                                    false);
     }
 
@@ -204,7 +262,8 @@ public class RetrievalWorkerTest extends RetrievalTestBase {
                                    tempDir,
                                    overwrite,
                                    createMockOutputWriter(),
-                                   true);
+                                   true,
+                                   false);
     }
 
     private class MockRetrievalSource implements RetrievalSource {
@@ -226,7 +285,10 @@ public class RetrievalWorkerTest extends RetrievalTestBase {
         public ContentStream getSourceContent(ContentItem contentItem) {
             InputStream stream =
                 new ByteArrayInputStream(contentValue.getBytes());
-            return new ContentStream(stream, getSourceChecksum(contentItem));
+
+            String time = DateUtil.convertToStringLong(testTime);
+            return new ContentStream(stream, getSourceChecksum(contentItem),
+                                     time, time, time);
         }
     }
 
@@ -239,7 +301,8 @@ public class RetrievalWorkerTest extends RetrievalTestBase {
         public ContentStream getSourceContent(ContentItem contentItem) {
             InputStream stream =
                 new ByteArrayInputStream(contentValue.getBytes());
-            return new ContentStream(stream, "invalid-checksum");
+            return new ContentStream(stream, "invalid-checksum",
+                                     null, null, null);
         }
     }
 
