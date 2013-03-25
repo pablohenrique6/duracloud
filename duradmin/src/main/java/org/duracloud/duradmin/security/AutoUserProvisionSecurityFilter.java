@@ -75,7 +75,9 @@ public class AutoUserProvisionSecurityFilter extends SpringSecurityFilter {
                 && !StringUtils.isBlank(eppn)
                 && !StringUtils.isBlank(entitlement)) {
             try {
-                ensureUserProvisioned(mail, eppn, entitlement);
+                ensureUserProvisioned(mail.toLowerCase(),
+                                      eppn.toLowerCase(),
+                                      entitlement.toLowerCase());
 
             } catch (Exception e) {
                 log.warn("Unable to provision user: {}, due to: {}",
@@ -91,6 +93,9 @@ public class AutoUserProvisionSecurityFilter extends SpringSecurityFilter {
         chain.doFilter(request, response);
     }
 
+    /**
+     * Assumption that all args are lower-case.
+     */
     private void ensureUserProvisioned(String eppn,
                                        String mail,
                                        String entitlement) throws DuraCloudCheckedException {
@@ -137,11 +142,11 @@ public class AutoUserProvisionSecurityFilter extends SpringSecurityFilter {
         }
 
         int end = eppn.length();
-        if (eppn.toLowerCase().endsWith(".edu")) {
+        if (eppn.endsWith(".edu")) {
             end = eppn.length() - ".edu".length();
         }
 
-        return eppn.toLowerCase().substring(start + 1, end);
+        return eppn.substring(start + 1, end);
     }
 
     // Protected for unit testing
@@ -176,10 +181,8 @@ public class AutoUserProvisionSecurityFilter extends SpringSecurityFilter {
     }
 
     private boolean isDuraCloudEntitlement(String entitlement) {
-        return entitlement.toLowerCase()
-                .contains(DURACLOUD_USER_SHORT.toLowerCase())
-                || entitlement.toLowerCase()
-                .contains(DURACLOUD_USER_URI.toLowerCase());
+        return entitlement.contains(DURACLOUD_USER_SHORT.toLowerCase())
+                || entitlement.contains(DURACLOUD_USER_URI.toLowerCase());
     }
 
     @Override
