@@ -41,7 +41,7 @@ public class DurastoreConfigTest {
     private String[] ids = {"id0", "id1", "id2", "id3"};
     private String[] types = {StorageProviderType.AMAZON_S3.toString(),
                               StorageProviderType.RACKSPACE.toString(),
-                              StorageProviderType.SNAPSHOT.toString(),
+                              StorageProviderType.DPN.toString(),
                               StorageProviderType.IRODS.toString()};
     private String[] usernames = {"username0", "username1", "username2", "username3"};
     private String[] passwords = {"password0", "password1", "password2", "password3"};
@@ -88,14 +88,13 @@ public class DurastoreConfigTest {
                 props.put(p + DurastoreConfig.portKey, port);
                 props.put(p + DurastoreConfig.baseDirectoryKey, baseDirectory);
                 props.put(p + DurastoreConfig.resourceKey, resource);
-            } else if (types[i] == StorageProviderType.SNAPSHOT.toString()) {
+            } else if (types[i] == StorageProviderType.DPN.toString()) {
                 props.put(p + DurastoreConfig.snapshotUserKey, snapshotUser);
                 props.put(p + DurastoreConfig.bridgeHostKey, bridgeHost);
                 props.put(p + DurastoreConfig.bridgePortKey, bridgePort);
                 props.put(p + DurastoreConfig.bridgeUserKey, bridgeUser);
                 props.put(p + DurastoreConfig.bridgePassKey, bridgePass);
                 props.put(p + DurastoreConfig.bridgeMemberIDKey, bridgeMemberId);
-
             }
         }
         return props;
@@ -153,7 +152,7 @@ public class DurastoreConfigTest {
                                 options.get(BASE_DIRECTORY.name()));
             Assert.assertEquals(resource, options.get(RESOURCE.name()));
 
-        } else if (type == StorageProviderType.SNAPSHOT) {
+        } else if (type == StorageProviderType.DPN) {
             Assert.assertEquals(snapshotUser, options.get(SNAPSHOT_USER.name()));
             Assert.assertEquals(bridgeHost, options.get(BRIDGE_HOST.name()));
             Assert.assertEquals(bridgePort, options.get(BRIDGE_PORT.name()));
