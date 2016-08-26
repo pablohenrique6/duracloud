@@ -119,27 +119,23 @@ public class DuracloudContentWriter implements ContentWriter {
     private void writeChunk(String spaceId, ChunkInputStream chunk)
         throws NotFoundException {
         String chunkId = chunk.getChunkId();
-
-        
-        File chunkFile = null;
         boolean exists = false;
-        String chunkChecksum = null;
+
         // check if chunk exists in content store.
         try {
             if(!jumpStart){
-                exists =  this.contentStore.contentExists(spaceId, chunkId);
+                exists = this.contentStore.contentExists(spaceId, chunkId);
             }
-        } catch (Exception e1) {
-            String message = "failed to check for existence of chunk " + chunkId
-                + " in space "
-                + spaceId;
-            log.error(message,
-                      e1.getMessage());
-            throw new DuraCloudRuntimeException(message,e1);
+        } catch (Exception e) {
+            String message = "failed to check for existence of chunk " +
+                             chunkId + " in space " + spaceId;
+            log.error(message, e.getMessage());
+            throw new DuraCloudRuntimeException(message,e);
         }
-            
 
         int maxRetries = 5;
+        File chunkFile = null;
+        String chunkChecksum = null;
 
         try {
             // Write chunk as a temp file if no jumpstart and a content item already exists
@@ -148,29 +144,29 @@ public class DuracloudContentWriter implements ContentWriter {
                 chunkChecksum = getChunkChecksum(chunkFile);
             }
 
-
-            // Write chunk if jump start is enabled or it does not exist in storage or
-            // it exists in storage but checksums do not match
-            if (jumpStart || !exists || !chunkInStorage(spaceId, chunkId, chunkChecksum)) {
-                final File chunkFile1 = chunkFile;
-                final String chunkChecksum1 = chunkChecksum;
+            // Write chunk if jump start is enabled or file does not exist in storage or
+            // file exists in storage but checksums do not match
+            if (jumpStart || !exists || !checksumsMatch(spaceId, chunkId, chunkChecksum)) {
                 try {
-                    new Retrier(maxRetries).execute(() -> {
-                        InputStream chunkStream = null;
-                        try{
-                            ChunkInputStream chunkInputStream =
-                                chunkFile1 != null ?
-                                new ChunkInputStream(chunkId,
-                                                     chunkStream = new FileInputStream(chunkFile1),
-                                                     chunk.getChunkSize(),
-                                                     chunk.md5Preserved()) : chunk;
-                                                                                  
-                            writeSingle(spaceId, chunkChecksum1, chunkInputStream);
-                        }finally{
-                            IOUtils.closeQuietly(chunkStream);
-                        }
-                        return "";
-                    });
+                    if(null != chunkFile) { // Write the file
+                        final File finalChunkFile = chunkFile;
+                        final String finalChunkChecksum = chunkChecksum;
+
+                        new Retrier(maxRetries).execute(() -> {
+                            try(InputStream chunkStream =
+                                    new FileInputStream(finalChunkFile)){
+                                ChunkInputStream chunkInputStream =
+                                    new ChunkInputStream(chunkId,
+                                                         chunkStream,
+                                                         chunk.getChunkSize(),
+                                                         chunk.md5Preserved());
+                                writeSingle(spaceId, finalChunkChecksum, chunkInputStream);
+                            }
+                            return "";
+                        });
+                    } else { // Write the stream
+                        writeSingle(spaceId, null, chunk);
+                    }
                 } catch (Exception e) {
                     String err = "Failed to store chunk with ID " + chunkId +
                                  " in space " + spaceId + " after " + maxRetries +
@@ -202,18 +198,18 @@ public class DuracloudContentWriter implements ContentWriter {
     }
 
     /*
-     * Determines if an existing chunk in DuraCloud storage matches the given  checksum
+     * Determines if an existing chunk in DuraCloud storage matches the given checksum
      */
-    private boolean chunkInStorage(String spaceId, String contentId, String checksum) {
+    private boolean checksumsMatch(String spaceId, String contentId, String checksum) {
         try {
-                Map<String, String> props =
-                    contentStore.getContentProperties(spaceId, contentId);
-                String dcChecksum = props.get(ContentStore.CONTENT_CHECKSUM);
-                if(null != checksum && null != dcChecksum && checksum.equals(dcChecksum)) {
-                    return true; // File with matching checksum already in DuraCloud
-                } else {
-                    return false; // File exists in DuraCloud, but checksums don't match
-                }
+            Map<String, String> props =
+                contentStore.getContentProperties(spaceId, contentId);
+            String dcChecksum = props.get(ContentStore.CONTENT_CHECKSUM);
+            if(null != checksum && null != dcChecksum && checksum.equals(dcChecksum)) {
+                return true; // File with matching checksum already in DuraCloud
+            } else {
+                return false; // File exists in DuraCloud, but checksums don't match
+            }
         } catch (ContentStoreException e) {
             return false; // File does not exist in DuraCloud
         }
