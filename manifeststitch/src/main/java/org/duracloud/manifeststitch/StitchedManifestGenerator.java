@@ -18,7 +18,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.ParseException;
 
-import org.apache.commons.io.input.AutoCloseInputStream;
 import org.duracloud.chunk.manifest.ChunksManifest;
 import org.duracloud.chunk.manifest.ChunksManifestBean.ManifestHeader;
 import org.duracloud.chunk.manifest.xml.ManifestDocumentBinding;
@@ -55,12 +54,10 @@ public class StitchedManifestGenerator {
             File.createTempFile("stitched-manifest-" + spaceId,
                                 "." + format.name().toLowerCase());
         //download manifest and process each line.
-        try {
-            InputStream manifest = store.getManifest(spaceId, format);
+        try(InputStream manifest = store.getManifest(spaceId, format);
             BufferedReader reader = new BufferedReader(new InputStreamReader(manifest));
-            
             BufferedWriter writer =
-                new BufferedWriter(new OutputStreamWriter(new FileOutputStream(stitchedManifestFile)));
+                new BufferedWriter(new OutputStreamWriter(new FileOutputStream(stitchedManifestFile)));) {
             ManifestFormatter formatter = new ManifestFormatterFactory().create(format);
             String header = formatter.getHeader();
             String line = null;
@@ -82,25 +79,19 @@ public class StitchedManifestGenerator {
                 }
             } catch (IOException e) {
                 log.error("failed to complete manifest stiching.", e);
-            }finally{
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    log.error("failed to close piped input stream", e);
-                }
             }
         } catch (ContentStoreException e) {
             log.error("failed to generate stitched manifest: " + e.getMessage(), e);
             throw new IOException(e);
         }
         
-        return  new AutoCloseInputStream(new FileInputStream(stitchedManifestFile){
+        return  new FileInputStream(stitchedManifestFile){
             @Override
             public void close() throws IOException {
                 super.close();
                 stitchedManifestFile.delete();
             }
-        });
+        };
     }
 
     private void processLine(String line,
